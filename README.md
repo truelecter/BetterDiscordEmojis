@@ -9,8 +9,13 @@ To pick standart emojis you can switch tabs in bottom panel. First two ("Frequen
 
 ## TODO
 [ ] Standart emoji support
+
 [X] Textarea emoji picker
+
 [ ] Reactions emoji picker
+
 [ ] Settings panel
+
 [ ] Better installer
+
 [ ] Cross-platform
