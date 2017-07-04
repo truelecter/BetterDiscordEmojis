@@ -21,6 +21,43 @@ var SCROLLER_WRAP = null;
 var SCROLLER_WRAP_OLD = null;
 var SEARCH_INPUT = null;
 
+const REACTION_POPOUT_REGEX = /TOGGLE_REACTION_POPOUT_(\d+)/;
+const CURRENT_SELECTED_CHANNEL_REGEX = /.*\/\d+\/(\d+)/;
+
+function findReact(dom) {
+    for (var key in dom) {
+        if (key.startsWith("__reactInternalInstance$")) {
+            return dom[key];
+        }
+    }
+    return null;
+};
+
+function getSelectedMessageId() {
+    try {
+        return REACTION_POPOUT_REGEX.exec(
+            findReact($(".btn-reaction.popout-open").parent().get(0))
+            ._currentElement.props.children
+            .filter(c => {
+                return Object.keys(c.props).indexOf("subscribeTo") != -1;
+            })[0].props.subscribeTo)[1];
+    } catch (e) {
+        return null;
+    }
+}
+
+function getCurrentSelectedChannel() {
+    return CURRENT_SELECTED_CHANNEL_REGEX.exec(window.location.pathname)[1];
+}
+
+function addCurrentMessageReaction(emoji) {
+    return addMessageReaction(getCurrentSelectedChannel(), getSelectedMessageId(), emoji);
+}
+
+function addMessageReaction(channel, message, emoji) {
+    $.ajax(API_BASE + "/channels/" + channel + "/messages/" + message + "/reactions/:" + emoji.name + ":" + emoji.id + "/@me", { method: "PUT" });
+}
+
 
 function replaceScroller() {
     SCROLLER_WRAP = buildScrollerWrap();
@@ -69,7 +106,7 @@ function getEmojisForServer(server) {
     var e = []
 
     for (var i in servers) {
-        
+
         if (!server.canUserSharedEmojis && servers[i].id !== server.id) {
             continue;
         }
@@ -110,7 +147,7 @@ function getCurrentServer() {
             return servers[i]
         }
     }
-    // should never happen
+    // will happen in private messages
     throw "Unknown server selected";
 }
 
@@ -122,14 +159,15 @@ function isCurrentSelectedServer(server) {
 function buildEmojisRows(eL) {
     var s = $("<span class=\"tl-emoji-list\"></span>");
     var r = $(ELEMENT_SERVER_EMOJI_LIST_ROW);
+    var emojiClickHandler = $(".channel-textarea-emoji").hasClass("popout-open") ? putEmojiInTextarea : addCurrentMessageReaction;
 
-    function emojiElement(emoji) {
+    function emojiElement(emoji, cb) {
         return $(ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY)
             .css("background-image", "url(\"" + getEmojiUrl(emoji) + "\")")
             .click(function() {
                 console.log("Selected emoji - " + emojiInTextarea(emoji));
-                putEmojiInTextarea(emoji);
             })
+            .click(() => { cb(emoji) })
             .hover(function() {
                 $(this).addClass("selected");
                 if (SEARCH_INPUT) {
@@ -149,7 +187,7 @@ function buildEmojisRows(eL) {
             s.append(r);
             r = $(ELEMENT_SERVER_EMOJI_LIST_ROW);
         }
-        r.append(emojiElement(eL[i]));
+        r.append(emojiElement(eL[i], emojiClickHandler));
     }
     s.append(r);
 
@@ -352,7 +390,8 @@ var EMOJI_PICKER_OBSERVER = watchForEmojiPickerChange(function(mutations) {
     for (var i in mutations) {
         if (mutations[i].type === "childList") {
             if (mutations[i].addedNodes.length > 0) {
-                if ($(EMOJI_PICKER_PATH).find(".emoji-picker").length && $(".channel-textarea-emoji").hasClass("popout-open")) {
+                if ($(EMOJI_PICKER_PATH).find(".emoji-picker").length &&
+                    ($(".channel-textarea-emoji").hasClass("popout-open") || $(".btn-reaction.popout-open").length)) {
                     addCustomScrollerParts();
                 }
                 // replaceScroller();

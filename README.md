@@ -1,6 +1,8 @@
 # BetterDiscordEmojis
 Modified emoji picker for Discord
 
+[Download](https://github.com/TrueLecter/BetterDiscordEmojis/releases "Releases")
+
 ## Features
 Get rid of grayed-out emojis which you can't pick on servers. Now you'll see only emojis you can pick on this server.
 ![before after](http://i.imgur.com/H2yoZlk.png "Functionality preview")
@@ -12,7 +14,7 @@ To pick standart emojis you can switch tabs in bottom panel. First two ("Frequen
 
 [X] Textarea emoji picker
 
-[ ] Reactions emoji picker
+[X] Reactions emoji picker
 
 [ ] Settings panel
 
