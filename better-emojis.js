@@ -4,15 +4,7 @@ var API_BASE = "https://discordapp.com/api";
 /*May be changed with discord updates*/
 var EMOJI_PICKER_PATH = "#app-mount > div > div:nth-child(7)";
 /*May be changed with discord updates*/
-var LOCAL_STORAGE_MODULE;
-// workaround to automatically retreive localstorage implementation
-for (var i = 0; i < 5700; i++) {
-    try {
-    if (webpackJsonp([], [], [i]).hasOwnProperty("impl")) {
-        LOCAL_STORAGE_MODULE = i;
-        break;
-    }}catch(e){}
-}
+var LOCAL_STORAGE_MODULE = 1646;
 
 var ELEMENT_SCROLLER_WRAP = '<div class="scroller-wrap"><div class="scroller"></div></div>';
 
