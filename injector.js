@@ -50,7 +50,7 @@
 			console.log('Better-emojis scripts loaded');
 		})
 		.catch((error) => {
-			console.log('Loaded scripts error', err);
+			console.log('Loaded scripts error', error);
 			console.log('Retrying in 5 seconds...');
 
 			setTimeout(loadScripts, 5000);
@@ -104,7 +104,7 @@
 				}
 			};
 
-			resolver(options, (response) => {
+			resolver.get(options, (response) => {
 				if (response.statusCode < 200 || response.statusCode > 299) {
 					return reject(
 						new Error(`Failed to load page, status code: ${response.statusCode}`)
@@ -114,7 +114,7 @@
 				let body = '';
 
 				response
-				.on('data', () => body += chunk)
+				.on('data', (chunk) => body += chunk)
 				.on('end', () => resolve(body));
 
 			})
