@@ -52,7 +52,7 @@
             .then((json) => {
                 const commitId = JSON.parse(json).object.sha;
                 // Get jquery from latest github commit
-                getContent("cdn.rawgit.com", "/TrueLecter/BetterDiscordEmojis/" + commitId + "/jquery.js", true)
+                getContent("raw.githubusercontent.com", "/TrueLecter/BetterDiscordEmojis/" + commitId + "/jquery.js", true)
                     .then((js) => {
                         // Add jquery code to page if not done yet
                         if (!window.better_emojis.jquery) {
@@ -61,7 +61,7 @@
                         }
 
                         // Get main script from latest commit
-                        getContent("cdn.rawgit.com", "/TrueLecter/BetterDiscordEmojis/" + commitId + "/better-emojis.js", true)
+                        getContent("raw.githubusercontent.com", "/TrueLecter/BetterDiscordEmojis/" + commitId + "/better-emojis.js", true)
                             .then((js) => {
                                 // Add main script if not done yet
                                 if (!window.better_emojis.be) {
