@@ -1,31 +1,31 @@
-var MY_ID = "";
-var API_BASE = "https://discordapp.com/api";
+let MY_ID = "";
+const API_BASE = "https://discordapp.com/api";
 
 /*May be changed with discord updates*/
-var EMOJI_PICKER_PATH = "#app-mount > div > div:nth-child(7)";
+const EMOJI_PICKER_PATH = "#app-mount > div > div:nth-child(7)";
 /*May be changed with discord updates*/
-var LOCAL_STORAGE_MODULE = 1646;
+const LOCAL_STORAGE_MODULE = 1646;
 
-var ELEMENT_SCROLLER_WRAP = '<div class="scroller-wrap"><div class="scroller"></div></div>';
+const ELEMENT_SCROLLER_WRAP = '<div class="scroller-wrap"><div class="scroller"></div></div>';
 
-var ELEMENT_SEARCH_INPUT = '<input type="text" placeholder="Find the perfect emoji" value="">';
+const ELEMENT_SEARCH_INPUT = '<input type="text" placeholder="Find the perfect emoji" value="">';
 
-var ELEMENT_SERVER_EMOJI_LIST = '<span class="server-emojis"><div class="category">server.name</div></span>';
-var ELEMENT_SERVER_EMOJI_LIST_ROW = '<div class="row"></div>';
-var ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY = '<div class="emoji-item"></div>'; // max 10 per row
+const ELEMENT_SERVER_EMOJI_LIST = '<span class="server-emojis"><div class="category">server.name</div></span>';
+const ELEMENT_SERVER_EMOJI_LIST_ROW = '<div class="row"></div>';
+const ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY = '<div class="emoji-item"></div>'; // max 10 per row
 
-var servers = [];
-var globalSharedEmojis = [];
+let servers = [];
+const globalSharedEmojis = [];
 
-var SCROLLER_WRAP = null;
-var SCROLLER_WRAP_OLD = null;
-var SEARCH_INPUT = null;
+let SCROLLER_WRAP = null;
+let SCROLLER_WRAP_OLD = null;
+let SEARCH_INPUT = null;
 
 const REACTION_POPOUT_REGEX = /TOGGLE_REACTION_POPOUT_(\d+)/;
 const CURRENT_SELECTED_CHANNEL_REGEX = /.*\/\d+\/(\d+)/;
 
 function findReact(dom) {
-    for (var key in dom) {
+    for (const key in dom) {
         if (key.startsWith("__reactInternalInstance$")) {
             return dom[key];
         }
@@ -39,7 +39,7 @@ function getSelectedMessageId() {
             findReact($(".btn-reaction.popout-open").parent().get(0))
             ._currentElement.props.children
             .filter(c => {
-                return Object.keys(c.props).indexOf("subscribeTo") != -1;
+                return Object.keys(c.props).includes("subscribeTo");
             })[0].props.subscribeTo)[1];
     } catch (e) {
         return null;
@@ -55,9 +55,8 @@ function addCurrentMessageReaction(emoji) {
 }
 
 function addMessageReaction(channel, message, emoji) {
-    $.ajax(API_BASE + "/channels/" + channel + "/messages/" + message + "/reactions/:" + emoji.name + ":" + emoji.id + "/@me", { method: "PUT" });
+    $.ajax(`${API_BASE}/channels/${channel}/messages/${message}/reactions/:${emoji.name}:${emoji.id}/@me`, { method: "PUT" });
 }
-
 
 function replaceScroller() {
     SCROLLER_WRAP = buildScrollerWrap();
@@ -71,9 +70,9 @@ function replaceSearchInput() {
 }
 
 function buildSearchInput() {
-    var r = $(ELEMENT_SEARCH_INPUT);
+    const r = $(ELEMENT_SEARCH_INPUT);
 
-    r.on('change keydown keyup paste', function() {
+    r.on('change keydown keyup paste', () => {
         if (r.val().replace(/\s+/g, '')) {
             SCROLLER_WRAP.find(".scroller").html(" ");
             SCROLLER_WRAP.find(".scroller").append(buildEmojisRows(filterEmojis(r.val())))
@@ -90,11 +89,11 @@ function buildSearchResult(query) {
 }
 
 function filterEmojis(query) {
-    var eL = getEmojisForServer(getCurrentServer());
-    var r = [];
+    const eL = getEmojisForServer(getCurrentServer());
+    const r = [];
 
-    for (var i in eL) {
-        if (eL[i].name.indexOf(query) != -1) {
+    for (const i in eL) {
+        if (eL[i].name.includes(query)) {
             r.push(eL[i]);
         }
     }
@@ -103,16 +102,16 @@ function filterEmojis(query) {
 }
 
 function getEmojisForServer(server) {
-    var e = []
+    const e = [];
 
-    for (var i in servers) {
+    for (const i in servers) {
 
         if (!server.canUserSharedEmojis && servers[i].id !== server.id) {
             continue;
         }
 
-        var eL = ((server.id === servers[i].id) ? servers[i].emojis : servers[i].sharedEmojis);
-        for (var k in eL) {
+        const eL = ((server.id === servers[i].id) ? servers[i].emojis : servers[i].sharedEmojis);
+        for (const k in eL) {
             e.push(eL[k]);
         }
     }
@@ -121,17 +120,17 @@ function getEmojisForServer(server) {
 }
 
 function buildScrollerWrap() {
-    var s = SCROLLER_WRAP || $(ELEMENT_SCROLLER_WRAP);
+    const s = SCROLLER_WRAP || $(ELEMENT_SCROLLER_WRAP);
     s.find(".scroller").html(" ");
 
-    var c = getCurrentServer();
+    const c = getCurrentServer();
     // Append all current server emojis, if any
     if (c.emojis.length > 0)
         s.find(".scroller").append(buildServerSpan(c));
 
     // Append all other server shared emojis
     if (c.canUserSharedEmojis) {
-        for (var i in servers) {
+        for (const i in servers) {
             if (!isCurrentSelectedServer(servers[i]) && servers[i].sharedEmojis.length > 0) {
                 s.find(".scroller").append(buildServerSpan(servers[i]));
             }
@@ -142,7 +141,7 @@ function buildScrollerWrap() {
 }
 
 function getCurrentServer() {
-    for (var i in servers) {
+    for (const i in servers) {
         if (isCurrentSelectedServer(servers[i])) {
             return servers[i]
         }
@@ -152,20 +151,20 @@ function getCurrentServer() {
 }
 
 function isCurrentSelectedServer(server) {
-    var currentServerId = /(\d+)/.exec($(".guild.selected").find(".guild-inner>a").attr("style"))[0];
-    return (server.id + "") === currentServerId
+    const currentServerId = /(\d+)/.exec($(".guild.selected").find(".guild-inner>a").attr("style"))[0];
+    return (`${server.id}`) === currentServerId
 }
 
 function buildEmojisRows(eL) {
-    var s = $("<span class=\"tl-emoji-list\"></span>");
-    var r = $(ELEMENT_SERVER_EMOJI_LIST_ROW);
-    var emojiClickHandler = $(".channel-textarea-emoji").hasClass("popout-open") ? putEmojiInTextarea : addCurrentMessageReaction;
+    const s = $("<span class=\"tl-emoji-list\"></span>");
+    let r = $(ELEMENT_SERVER_EMOJI_LIST_ROW);
+    const emojiClickHandler = $(".channel-textarea-emoji").hasClass("popout-open") ? putEmojiInTextarea : addCurrentMessageReaction;
 
     function emojiElement(emoji, cb) {
         return $(ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY)
-            .css("background-image", "url(\"" + getEmojiUrl(emoji) + "\")")
-            .click(function() {
-                console.log("Selected emoji - " + emojiInTextarea(emoji));
+            .css("background-image", `url("${getEmojiUrl(emoji)}")`)
+            .click(() => {
+                console.log(`Selected emoji - ${emojiInTextarea(emoji)}`);
             })
             .click(() => { cb(emoji) })
             .hover(function() {
@@ -181,7 +180,7 @@ function buildEmojisRows(eL) {
             });
     }
 
-    for (var i in eL) {
+    for (const i in eL) {
         // console.log(i, eL);
         if ((i != 0) && (i % 10 == 0)) {
             s.append(r);
@@ -195,11 +194,11 @@ function buildEmojisRows(eL) {
 }
 
 function buildServerSpan(server) {
-    var s = $(ELEMENT_SERVER_EMOJI_LIST);
+    const s = $(ELEMENT_SERVER_EMOJI_LIST);
     s.find(".category").html(server.name);
 
-    var r = $(ELEMENT_SERVER_EMOJI_LIST_ROW);
-    var eL = isCurrentSelectedServer(server) ? server.emojis : server.sharedEmojis;
+    const r = $(ELEMENT_SERVER_EMOJI_LIST_ROW);
+    const eL = isCurrentSelectedServer(server) ? server.emojis : server.sharedEmojis;
 
     s.append(buildEmojisRows(eL));
 
@@ -207,25 +206,25 @@ function buildServerSpan(server) {
 }
 
 function putEmojiInTextarea(emoji) {
-    var textarea = $(".channel-textarea >> textarea");
-    textarea.val(textarea.val() + emojiInTextarea(emoji) + " ");
+    const textarea = $(".channel-textarea >> textarea");
+    textarea.val(`${textarea.val() + emojiInTextarea(emoji)} `);
 }
 
 function emojiInTextarea(emoji) {
-    return emoji.require_colons ? (":" + emoji.name + ":") : emoji.name;
+    return emoji.require_colons ? (`:${emoji.name}:`) : emoji.name;
 }
 
 function getEmojiUrl(emoji) {
-    return "https://cdn.discordapp.com/emojis/" + emoji.id + ".png";
+    return `https://cdn.discordapp.com/emojis/${emoji.id}.png`;
 }
 
 // TODO Rewrite all belove using promises
 function getServers(cb) {
     $.ajax({
         "async": true,
-        "url": API_BASE + "/users/@me/guilds",
+        "url": `${API_BASE}/users/@me/guilds`,
         "method": "GET"
-    }).done(function(response) {
+    }).done(response => {
         cb(response);
     });
 }
@@ -233,9 +232,9 @@ function getServers(cb) {
 function getMyId(cb) {
     $.ajax({
         "async": true,
-        "url": API_BASE + "/users/@me",
+        "url": `${API_BASE}/users/@me`,
         "method": "GET"
-    }).done(function(response) {
+    }).done(response => {
         MY_ID = response.id;
         cb(MY_ID);
     });
@@ -244,12 +243,12 @@ function getMyId(cb) {
 function parseServer(server) {
     $.ajax({
         "async": true,
-        "url": API_BASE + "/guilds/" + server.id + "/members/" + MY_ID,
+        "url": `${API_BASE}/guilds/${server.id}/members/${MY_ID}`,
         "method": "GET"
-    }).done(function(response) {
+    }).done(response => {
         // fill base server info
         // console.log(server.id, response, response.roles);
-        var srv = {};
+        const srv = {};
         srv.roles = response.roles;
         srv.id = server.id;
         srv.emojis = [];
@@ -260,17 +259,17 @@ function parseServer(server) {
 
         $.ajax({
             "async": true,
-            "url": API_BASE + "/guilds/" + srv.id,
+            "url": `${API_BASE}/guilds/${srv.id}`,
             "method": "GET"
-        }).done(function(response) {
+        }).done(response => {
             // console.log(response.emojis);
             // now we got detailed info about server. fill emoji and managed emojis.
             // also set name
             srv.name = response.name;
 
-            response.emojis.forEach(function(emoji) {
+            response.emojis.forEach(emoji => {
                 // get emoji required roles
-                var eR = emoji.roles;
+                const eR = emoji.roles;
                 // no roles required for emoji
                 emoji.url = getEmojiUrl(emoji.id);
                 if (!eR.length) {
@@ -280,10 +279,10 @@ function parseServer(server) {
                     }
                     return;
                 }
-                for (var i in eR) {
+                for (const i in eR) {
                     //we have required role
                     // console.log(srv.roles, eR, srv.roles.indexOf(eR[i]));
-                    if (srv.roles.indexOf(eR[i]) != -1) {
+                    if (srv.roles.includes(eR[i])) {
                         srv.emojis.push(emoji);
                         if (emoji.managed) {
                             srv.sharedEmojis.push(emoji);
@@ -315,19 +314,19 @@ function parseServers(serversA, callback) {
 }
 
 function doGetEmojis() {
-    var token = webpackJsonp([], [], [LOCAL_STORAGE_MODULE]).impl.get(webpackJsonp([], [], [0]).TOKEN_KEY);
+    const token = webpackJsonp([], [], [LOCAL_STORAGE_MODULE]).impl.get(webpackJsonp([], [], [0]).TOKEN_KEY);
 
     servers = [];
     MY_ID = "";
     // common stuff for all requests
     $.ajaxSetup({
         "crossDomain": true,
-        // window.token should be set from index.js or whereever before 
+        // window.token should be set from index.js or whereever before
         "headers": { "authorization": token }
     });
-    getMyId(function() {
-        getServers(function(servers) {
-            parseServers(servers, function() { console.log("done") });
+    getMyId(() => {
+        getServers(servers => {
+            parseServers(servers, () => { console.log("done") });
         });
     });
 }
@@ -335,12 +334,12 @@ function doGetEmojis() {
 doGetEmojis();
 
 function watchForEmojiPickerChange(listener) {
-    var observer = new MutationObserver(function(mutations) {
+    const observer = new MutationObserver(mutations => {
         if (listener) {
             listener(mutations);
         }
     });
-    var config = { childList: true };
+    const config = { childList: true };
     observer.observe($(EMOJI_PICKER_PATH)[0], config);
     return observer;
 }
@@ -360,13 +359,13 @@ function addCustomScrollerParts() {
     // console.log("picker opened");
     setTimeout(replaceScroller, 20);
     setTimeout(replaceSearchInput, 20);
-    setTimeout(function() {
-        var categories = $(EMOJI_PICKER_PATH).find('.categories');
-        var categoriesChildren = categories.children();
-        var customScroller = ['recent', 'custom'];
+    setTimeout(() => {
+        const categories = $(EMOJI_PICKER_PATH).find('.categories');
+        const categoriesChildren = categories.children();
+        const customScroller = ['recent', 'custom'];
 
         categories.on('click', '.item', function(event) {
-            var $this = $(this);
+            const $this = $(this);
 
             categoriesChildren.removeClass('selected');
 
@@ -386,8 +385,8 @@ function addCustomScrollerParts() {
     setTimeout(showCustomScroller, 30);
 }
 
-var EMOJI_PICKER_OBSERVER = watchForEmojiPickerChange(function(mutations) {
-    for (var i in mutations) {
+const EMOJI_PICKER_OBSERVER = watchForEmojiPickerChange(mutations => {
+    for (const i in mutations) {
         if (mutations[i].type === "childList") {
             if (mutations[i].addedNodes.length > 0) {
                 if ($(EMOJI_PICKER_PATH).find(".emoji-picker").length &&
