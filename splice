@@ -2,8 +2,7 @@
         // tl_better_emojis_recognizr
         mainWindow.webContents.on('dom-ready', function() {
             mainWindow.webContents.executeJavaScript(
-              "window.jQueryPath = '$$better-emojis-path$$/jquery.js';\n" +
-              "window.injectablePath = '$$better-emojis-path$$/better-emojis.js';" 
+              "window.betterEmojiLocation = '$$better-emojis-path$$/';" 
             );
             mainWindow.webContents.executeJavaScript(
                 _fs2.default.readFileSync('$$better-emojis-path$$/injector.js', 'utf-8')
