@@ -22,7 +22,9 @@ let SCROLLER_WRAP_OLD = null;
 let SEARCH_INPUT = null;
 
 const REACTION_POPOUT_REGEX = /TOGGLE_REACTION_POPOUT_(\d+)/;
-const CURRENT_SELECTED_CHANNEL_REGEX = /.*\/\d+\/(\d+)/;
+const CURRENT_SELECTED_CHANNEL_REGEX = /.*\/.+\/(\d+)/;
+const CURRENT_SELECTED_SERVER_REGEX = /.*\/(\d+)\/\d+/;
+const IS_INBOX_REGEX = /\/channels\/@me\/\d+/;
 
 function findReact(dom) {
     for (const key in dom) {
@@ -140,19 +142,27 @@ function buildScrollerWrap() {
     return s;
 }
 
+function isInInbox(){
+    return IS_INBOX_REGEX.test(window.location)
+}
+
 function getCurrentServer() {
+    if (isInInbox()){
+        return {canUserSharedEmojis: true, emojis: [], sharedEmojis: [], id: "@me"};
+    }
+
     for (const i in servers) {
         if (isCurrentSelectedServer(servers[i])) {
             return servers[i]
         }
     }
-    // will happen in private messages
+    // should never happen
     throw "Unknown server selected";
 }
 
 function isCurrentSelectedServer(server) {
-    const currentServerId = /(\d+)/.exec($(".guild.selected").find(".guild-inner>a").attr("style"))[0];
-    return (`${server.id}`) === currentServerId
+    const currentServerIdRes = CURRENT_SELECTED_SERVER_REGEX.exec(window.location);
+    return currentServerIdRes && (`${server.id}`) === currentServerIdRes[1]
 }
 
 function buildEmojisRows(eL) {
