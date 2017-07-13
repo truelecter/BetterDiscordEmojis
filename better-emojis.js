@@ -142,13 +142,13 @@ function buildScrollerWrap() {
     return s;
 }
 
-function isInInbox(){
+function isInInbox() {
     return IS_INBOX_REGEX.test(window.location)
 }
 
 function getCurrentServer() {
-    if (isInInbox()){
-        return {canUserSharedEmojis: true, emojis: [], sharedEmojis: [], id: "@me"};
+    if (isInInbox()) {
+        return { canUserSharedEmojis: true, emojis: [], sharedEmojis: [], id: "@me" };
     }
 
     for (const i in servers) {
@@ -228,99 +228,86 @@ function getEmojiUrl(emoji) {
     return `https://cdn.discordapp.com/emojis/${emoji.id}.png`;
 }
 
-// TODO Rewrite all belove using promises
-function getServers(cb) {
-    $.ajax({
+function getServers() {
+    return $.ajax({
         "async": true,
         "url": `${API_BASE}/users/@me/guilds`,
         "method": "GET"
-    }).done(response => {
-        cb(response);
-    });
+    })
 }
 
-function getMyId(cb) {
-    $.ajax({
+function getMyId() {
+    return $.ajax({
         "async": true,
         "url": `${API_BASE}/users/@me`,
         "method": "GET"
-    }).done(response => {
+    }).then(response => {
         MY_ID = response.id;
-        cb(MY_ID);
     });
 }
 
 function parseServer(server) {
-    $.ajax({
-        "async": true,
-        "url": `${API_BASE}/guilds/${server.id}/members/${MY_ID}`,
-        "method": "GET"
-    }).done(response => {
-        // fill base server info
-        // console.log(server.id, response, response.roles);
-        const srv = {};
-        srv.roles = response.roles;
-        srv.id = server.id;
-        srv.emojis = [];
-        srv.sharedEmojis = [];
-        srv.permissions = server.permissions;
-        // test if we can use custom emojis on this server
-        srv.canUserSharedEmojis = ((srv.permissions & 0x00040000) != 0);
-
+    return new Promise((resolve, reject) => {
         $.ajax({
             "async": true,
-            "url": `${API_BASE}/guilds/${srv.id}`,
+            "url": `${API_BASE}/guilds/${server.id}/members/${MY_ID}`,
             "method": "GET"
         }).done(response => {
-            // console.log(response.emojis);
-            // now we got detailed info about server. fill emoji and managed emojis.
-            // also set name
-            srv.name = response.name;
+            // fill base server info
+            // console.log(server.id, response, response.roles);
+            const srv = {};
+            srv.roles = response.roles;
+            srv.id = server.id;
+            srv.emojis = [];
+            srv.sharedEmojis = [];
+            srv.permissions = server.permissions;
+            // test if we can use custom emojis on this server
+            srv.canUserSharedEmojis = ((srv.permissions & 0x00040000) != 0);
 
-            response.emojis.forEach(emoji => {
-                // get emoji required roles
-                const eR = emoji.roles;
-                // no roles required for emoji
-                emoji.url = getEmojiUrl(emoji.id);
-                if (!eR.length) {
-                    srv.emojis.push(emoji);
-                    if (emoji.managed) {
-                        srv.sharedEmojis.push(emoji);
-                    }
-                    return;
-                }
-                for (const i in eR) {
-                    //we have required role
-                    // console.log(srv.roles, eR, srv.roles.indexOf(eR[i]));
-                    if (srv.roles.includes(eR[i])) {
+            $.ajax({
+                "async": true,
+                "url": `${API_BASE}/guilds/${srv.id}`,
+                "method": "GET"
+            }).done(response => {
+                // console.log(response.emojis);
+                // now we got detailed info about server. fill emoji and managed emojis.
+                // also set name
+                srv.name = response.name;
+
+                response.emojis.forEach(emoji => {
+                    // get emoji required roles
+                    const eR = emoji.roles;
+                    // no roles required for emoji
+                    emoji.url = getEmojiUrl(emoji.id);
+                    if (!eR.length) {
                         srv.emojis.push(emoji);
                         if (emoji.managed) {
                             srv.sharedEmojis.push(emoji);
                         }
-                        break;
+                        return;
                     }
-                }
+                    for (const i in eR) {
+                        //we have required role
+                        // console.log(srv.roles, eR, srv.roles.indexOf(eR[i]));
+                        if (srv.roles.includes(eR[i])) {
+                            srv.emojis.push(emoji);
+                            if (emoji.managed) {
+                                srv.sharedEmojis.push(emoji);
+                            }
+                            break;
+                        }
+                    }
+                });
+                // save server info
+                servers.push(srv);
+                resolve(srv);
             });
-            // save server info
-            servers.push(srv);
         });
     });
 }
 
-function parseServers(serversA, callback) {
-    if (serversA) {
-        serversA.forEach(parseServer);
-    }
-
-    function checkAllServersDone() {
-        if (servers.length == serversA.length) {
-            if (callback)
-                callback();
-        } else {
-            setTimeout(checkAllServersDone, 100);
-        }
-    }
-    checkAllServersDone();
+function parseServers(serversA) {
+    return Promise.all(serversA.map(srv => parseServer(srv)));
 }
 
 function doGetEmojis() {
@@ -331,14 +318,13 @@ function doGetEmojis() {
     // common stuff for all requests
     $.ajaxSetup({
         "crossDomain": true,
-        // window.token should be set from index.js or whereever before
         "headers": { "authorization": token }
     });
-    getMyId(() => {
-        getServers(servers => {
-            parseServers(servers, () => { console.log("done") });
-        });
-    });
+
+    getMyId()
+        .then(getServers)
+        .then(parseServers)
+        .then(() => {console.log("Better Emojis initialized")})
 }
 
 doGetEmojis();
