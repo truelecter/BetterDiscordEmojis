@@ -4,7 +4,7 @@ const API_BASE = "https://discordapp.com/api";
 /*May be changed with discord updates*/
 const EMOJI_PICKER_PATH = "#app-mount > div > div:nth-child(7)";
 /*May be changed with discord updates*/
-const LOCAL_STORAGE_MODULE = 1646;
+const LOCAL_STORAGE_MODULE = 1590;
 
 const ELEMENT_SCROLLER_WRAP = '<div class="scroller-wrap"><div class="scroller"></div></div>';
 
