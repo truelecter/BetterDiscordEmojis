@@ -3,8 +3,10 @@ const API_BASE = "https://discordapp.com/api";
 
 /*May be changed with discord updates*/
 const EMOJI_PICKER_PATH = "#app-mount > div > div:nth-child(7)";
-/*May be changed with discord updates*/
-const LOCAL_STORAGE_MODULE = 1590;
+const LOCAL_STORAGE_MODULE = n(1590);
+const EMOJI_STORAGE_MODULE = n(168).default;
+const TRANSLATION_MODULE = n(3);
+/*May be changed with discord updates.END*/
 
 const ELEMENT_SCROLLER_WRAP = '<div class="scroller-wrap"><div class="scroller"></div></div>';
 
@@ -14,8 +16,9 @@ const ELEMENT_SERVER_EMOJI_LIST = '<span class="server-emojis"><div class="categ
 const ELEMENT_SERVER_EMOJI_LIST_ROW = '<div class="row"></div>';
 const ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY = '<div class="emoji-item"></div>'; // max 10 per row
 
-let servers = [];
-const globalSharedEmojis = [];
+const servers = [];
+const commonEmojis = [];
+let commonEmojisSpansCache = "";
 
 let SCROLLER_WRAP = null;
 let SCROLLER_WRAP_OLD = null;
@@ -25,6 +28,8 @@ const REACTION_POPOUT_REGEX = /TOGGLE_REACTION_POPOUT_(\d+)/;
 const CURRENT_SELECTED_CHANNEL_REGEX = /.*\/.+\/(\d+)/;
 const CURRENT_SELECTED_SERVER_REGEX = /.*\/(\d+)\/\d+/;
 const IS_INBOX_REGEX = /\/channels\/@me\/\d+/;
+
+const OPTIONS = { enabled: true, showOnlyCustomEmojisInSearch: false, showOnlyCustomEmojistInList: false };
 
 function findReact(dom) {
     for (const key in dom) {
@@ -67,8 +72,16 @@ function replaceScroller() {
 }
 
 function replaceSearchInput() {
-    SEARCH_INPUT = buildSearchInput();
-    $(EMOJI_PICKER_PATH).find("input").hide().before(SEARCH_INPUT);
+    // SEARCH_INPUT = buildSearchInput();
+    // $(EMOJI_PICKER_PATH).find("input").hide().before(SEARCH_INPUT);
+    // Temporary disabled, as original search have much better performance
+    $(EMOJI_PICKER_PATH).find("input").change((e) => {
+        if (!$(e.target).val()) {
+            showCustomScroller();
+        } else {
+            showOriginalScroller();
+        }
+    });
 }
 
 function buildSearchInput() {
@@ -94,8 +107,10 @@ function filterEmojis(query) {
     const eL = getEmojisForServer(getCurrentServer());
     const r = [];
 
+    query = query.toLowerCase();
+
     for (const i in eL) {
-        if (eL[i].name.includes(query)) {
+        if (eL[i].name.toLowerCase().includes(query)) {
             r.push(eL[i]);
         }
     }
@@ -123,21 +138,28 @@ function getEmojisForServer(server) {
 
 function buildScrollerWrap() {
     const s = SCROLLER_WRAP || $(ELEMENT_SCROLLER_WRAP);
-    s.find(".scroller").html(" ");
+    const scr = s.find(".scroller");
+    scr.html(" ");
 
     const c = getCurrentServer();
     // Append all current server emojis, if any
     if (c.emojis.length > 0)
-        s.find(".scroller").append(buildServerSpan(c));
+        scr.append(buildServerSpan(c));
 
     // Append all other server shared emojis
     if (c.canUserSharedEmojis) {
-        for (const i in servers) {
-            if (!isCurrentSelectedServer(servers[i]) && servers[i].sharedEmojis.length > 0) {
-                s.find(".scroller").append(buildServerSpan(servers[i]));
+        for (const server of servers) {
+            if (!isCurrentSelectedServer(server) && server.sharedEmojis.length > 0) {
+                scr.append(buildServerSpan(server));
             }
         }
     }
+
+    // Append common emojis
+    if (commonEmojisSpansCache) {
+        scr.append(commonEmojisSpansCache);
+    }
+
 
     return s;
 }
@@ -151,9 +173,9 @@ function getCurrentServer() {
         return { canUserSharedEmojis: true, emojis: [], sharedEmojis: [], id: "@me" };
     }
 
-    for (const i in servers) {
-        if (isCurrentSelectedServer(servers[i])) {
-            return servers[i]
+    for (const server of servers) {
+        if (isCurrentSelectedServer(server)) {
+            return server
         }
     }
     // should never happen
@@ -172,7 +194,7 @@ function buildEmojisRows(eL) {
 
     function emojiElement(emoji, cb) {
         return $(ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY)
-            .css("background-image", `url("${getEmojiUrl(emoji)}")`)
+            .css("background-image", `url("${emoji.url}")`)
             .click(() => {
                 console.log(`Selected emoji - ${emojiInTextarea(emoji)}`);
             })
@@ -278,7 +300,7 @@ function parseServer(server) {
                     // get emoji required roles
                     const eR = emoji.roles;
                     // no roles required for emoji
-                    emoji.url = getEmojiUrl(emoji.id);
+                    emoji.url = getEmojiUrl(emoji);
                     if (!eR.length) {
                         srv.emojis.push(emoji);
                         if (emoji.managed) {
@@ -286,10 +308,10 @@ function parseServer(server) {
                         }
                         return;
                     }
-                    for (const i in eR) {
+                    for (const r in eR) {
                         //we have required role
                         // console.log(srv.roles, eR, srv.roles.indexOf(eR[i]));
-                        if (srv.roles.includes(eR[i])) {
+                        if (srv.roles.includes(r)) {
                             srv.emojis.push(emoji);
                             if (emoji.managed) {
                                 srv.sharedEmojis.push(emoji);
@@ -310,10 +332,48 @@ function parseServers(serversA) {
     return Promise.all(serversA.map(srv => parseServer(srv)));
 }
 
-function doGetEmojis() {
-    const token = webpackJsonp([], [], [LOCAL_STORAGE_MODULE]).impl.get(webpackJsonp([], [], [0]).TOKEN_KEY);
+function n(id) {
+    return webpackJsonp([], [], [id]);
+}
 
-    servers = [];
+function loadStandartEmojis() {
+    commonEmojis.length = 0;
+    commonEmojisSpansCache = "";
+
+    return new Promise((resolve, reject) => {
+        const translation = TRANSLATION_MODULE.Messages;
+        const categories = EMOJI_STORAGE_MODULE.getCategories();
+        commonEmojisSpansCache = $("<span></span>");
+
+        for (let category of categories) {
+            const fakeServer = { sharedEmojis: [], name: translation[`EMOJI_CATEGORY_${category.toUpperCase()}`] };
+            const emojis = EMOJI_STORAGE_MODULE.getByCategory(category);
+
+            for (let emoji of emojis) {
+                let fakeEmoji = {
+                    require_colons: emoji.allNamesString.includes(":"),
+                    managed: emoji.managed,
+                    name: emoji.uniqueName,
+                    roles: [],
+                    id: emoji.index,
+                    url: emoji.defaultUrl
+                }
+
+                fakeServer.sharedEmojis.push(fakeEmoji);
+            }
+
+            commonEmojis.push(fakeServer);
+            commonEmojisSpansCache.append(buildServerSpan(fakeServer));
+        }
+
+        resolve(commonEmojis);
+    });
+}
+
+function doGetEmojis() {
+    const token = LOCAL_STORAGE_MODULE.impl.get(n(0).TOKEN_KEY);
+
+    servers.length = 0;
     MY_ID = "";
     // common stuff for all requests
     $.ajaxSetup({
@@ -324,7 +384,9 @@ function doGetEmojis() {
     getMyId()
         .then(getServers)
         .then(parseServers)
-        .then(() => {console.log("Better Emojis initialized")})
+        .then(loadStandartEmojis)
+        // .catch(e => { console.error("Error initializing Better Emojis!\nProbably modules order has been changed\n", e) })
+        .then(() => { console.log("Better Emojis initialized") })
 }
 
 doGetEmojis();
