@@ -1,124 +1,137 @@
 (() => {
-	'use strict';
+    'use strict';
 
-	const http = require('http');
-	const https = require('https');
-	const { parse: urlParse } = require('url');
+    const http = require('http');
+    const https = require('https');
+    const { parse: urlParse } = require('url');
 
-	const USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36'
-	+ ' (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36';
+    const USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36' +
+        ' (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36';
 
-	loadScripts();
+    loadScripts();
 
-	function loadScripts() {
-		// Skip loading if already loaded
-		if (window.better_emojis && window.better_emojis.loaded) {
-			return;
-		}
+    function loadScripts() {
+        // Skip loading if already loaded
+        if (window.better_emojis && window.better_emojis.loaded) {
+            return;
+        }
 
-		window.better_emojis = {};
+        getRawGithub(
+                `TrueLecter/BetterDiscordEmojis/master/dependencies.json`
+            )
+            .then(JSON.parse)
+            .then(dependencies => {
+                const promises = [];
 
-		getContent(
-			'https://api.github.com/repos/TrueLecter/BetterDiscordEmojis/git/refs/heads/master'
-		)
-		.then(JSON.parse)
-		.then(({ object: { sha: commitId } }) => (
-			Promise.all([
-				getRawGithub(
-					`TrueLecter/BetterDiscordEmojis/${commitId}/jquery.js`
-				),
-				getRawGithub(
-					`TrueLecter/BetterDiscordEmojis/${commitId}/better-emojis.js`
-				)
-			])
-		))
-		.then(([jQuery, betterEmojis]) => {
-			if (!window.better_emojis.jquery) {
-				addScript(jQuery);
+                for (const dependency of dependencies) {
+                    promises.push(
+                        getContent(dependency.url).then(res => (dependency.data = res, dependency))
+                    );
+                }
 
-				window.better_emojis.jquery = true;
-			}
+                return Promise.all(promises);
+            })
+            .then(dependencies => {
+                for (const dependency of dependencies) {
+                    switch (dependency.type) {
+                        case "css":
+                            addStyle(dependency.data);
+                            break;
+                        case "script":
+                            addScript(dependency.data);
+                            break;
+                    }
+                }
 
-			if (!window.better_emojis.be) {
-				addScript(betterEmojis);
+                window.better_emojis.loaded = true;
 
-				window.better_emojis.be = true;
-			}
+                console.log('Better-emojis scripts loaded');
+            })
+            .catch((error) => {
+                console.log('Loaded scripts error', error);
+                console.log('Retrying in 5 seconds...');
 
-			window.better_emojis.loaded = true;
+                setTimeout(loadScripts, 5000);
+            });
 
-			console.log('Better-emojis scripts loaded');
-		})
-		.catch((error) => {
-			console.log('Loaded scripts error', error);
-			console.log('Retrying in 5 seconds...');
+        window.better_emojis = {};
+    }
 
-			setTimeout(loadScripts, 5000);
-		});
-	}
+    /**
+     * Adds js at document
+     *
+     * @param {string} js
+     */
+    function addScript(js) {
+        const script = document.createElement('script');
 
-	/**
-	 * Adds js at document
-	 *
-	 * @param {string} js
-	 */
-	function addScript(js) {
-		const script = document.createElement('script');
+        script.innerHTML = js;
 
-		script.innerHTML = js;
+        document.head.appendChild(script);
+    }
 
-		document.head.appendChild(script);
-	}
+    /**
+     * Adds css at document
+     *
+     * @param {string} css
+     */
+    function addStyle(css) {
+        const style = document.createElement('style');
 
-	/**
-	 * Returns github raw files
-	 *
-	 * @param {string} path
-	 *
-	 * @return {Promise<string>}
-	 */
-	function getRawGithub(path) {
-		path = 'https://raw.githubusercontent.com/' + path;
+        style.innerHTML = css;
 
-		return getContent(path);
-	}
+        document.head.appendChild(style);
+    }
 
-	/**
-	 * Fetch content with HTTP
-	 *
-	 * @param {string}  url
-	 *
-	 * @return {Promise<string>}
-	 */
-	function getContent(url) {
-		return new Promise((resolve, reject) => {
-			const { path, hostname, protocol } = urlParse(url);
+    /**
+     * Returns github raw files
+     *
+     * @param {string} path
+     *
+     * @return {Promise<string>}
+     */
+    function getRawGithub(path) {
+        path = 'https://raw.githubusercontent.com/' + path;
 
-			const resolver = protocol === 'https:' ? https : http;
+        return getContent(path);
+    }
 
-			const options = {
-				path,
-				hostname,
-				headers: {
-					'User-Agent': USER_AGENT
-				}
-			};
+    /**
+     * Fetch content with HTTP
+     *
+     * @param {string}  url
+     *
+     * @return {Promise<string>}
+     */
+    function getContent(url) {
+        return new Promise((resolve, reject) => {
+            const { path, hostname, protocol } = urlParse(url);
 
-			resolver.get(options, (response) => {
-				if (response.statusCode < 200 || response.statusCode > 299) {
-					return reject(
-						new Error(`Failed to load page, status code: ${response.statusCode}`)
-					);
-				}
+            const resolver = protocol === 'https:' ? https : http;
 
-				let body = '';
+            const options = {
+                path,
+                hostname,
+                headers: {
+                    'User-Agent': USER_AGENT
+                }
+            };
 
-				response
-				.on('data', (chunk) => body += chunk)
-				.on('end', () => resolve(body));
+            resolver.get(options, (response) => {
+                    if (response.statusCode < 200 || response.statusCode > 299) {
+                        return reject(
+                            new Error(`Failed to load page, status code: ${response.statusCode}`)
+                        );
+                    }
 
-			})
-			.on('error', reject);
-		});
-	}
+                    let body = '';
+
+                    response
+                        .on('data', (chunk) => body += chunk)
+                        .on('end', () => resolve(body));
+
+                })
+                .on('error', reject);
+        });
+    }
 })();
