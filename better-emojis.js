@@ -109,9 +109,9 @@ function filterEmojis(query) {
 
     query = query.toLowerCase();
 
-    for (const i in eL) {
-        if (eL[i].name.toLowerCase().includes(query)) {
-            r.push(eL[i]);
+    for (const e of eL) {
+        if (e.name.toLowerCase().includes(query)) {
+            r.push(e);
         }
     }
 
@@ -121,15 +121,15 @@ function filterEmojis(query) {
 function getEmojisForServer(server) {
     const e = [];
 
-    for (const i in servers) {
+    for (const s of servers) {
 
-        if (!server.canUserSharedEmojis && servers[i].id !== server.id) {
+        if (!server.canUserSharedEmojis && s.id !== server.id) {
             continue;
         }
 
-        const eL = ((server.id === servers[i].id) ? servers[i].emojis : servers[i].sharedEmojis);
-        for (const k in eL) {
-            e.push(eL[k]);
+        const eL = ((server.id === s.id) ? s.emojis : s.sharedEmojis);
+        for (const k of eL) {
+            e.push(k);
         }
     }
 
@@ -405,7 +405,7 @@ function doGetEmojis() {
         .then(parseServers)
         .then(loadStandartEmojis)
         .then(() => { console.log("Better Emojis initialized") })
-        .catch(e => { console.error("Error initializing Better Emojis!\nProbably modules order has been changed\n", e) })
+        .catch(e => { console.error("Error initializing Better Emojis!\nProbably modules order has been changed\n", e) });
 }
 
 doGetEmojis();
