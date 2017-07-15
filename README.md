@@ -10,7 +10,7 @@ Get rid of grayed-out emojis which you can't pick on servers. Now you'll see onl
 To pick standart emojis you can switch tabs in bottom panel. First two ("Frequently used" and "Custom") will activate custom picker, while any other will switch back to default picker.
 
 ## TODO
-[ ] Standart emoji support
+[X] Standart emoji support
 
 [X] Textarea emoji picker
 
@@ -18,6 +18,6 @@ To pick standart emojis you can switch tabs in bottom panel. First two ("Frequen
 
 [ ] Settings panel
 
-[ ] Better installer
+[X] Better installer
 
 [ ] Cross-platform
