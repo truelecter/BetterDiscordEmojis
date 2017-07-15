@@ -19,6 +19,7 @@ const ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY = '<div class="emoji-item"></div>'; //
 const servers = [];
 const commonEmojis = [];
 let commonEmojisSpansCache = "";
+let currentPickerEmojiRegistry = [];
 
 let SCROLLER_WRAP = null;
 let SCROLLER_WRAP_OLD = null;
@@ -75,7 +76,8 @@ function replaceSearchInput() {
     // SEARCH_INPUT = buildSearchInput();
     // $(EMOJI_PICKER_PATH).find("input").hide().before(SEARCH_INPUT);
     // Temporary disabled, as original search have much better performance
-    $(EMOJI_PICKER_PATH).find("input").change((e) => {
+    SEARCH_INPUT = $(EMOJI_PICKER_PATH).find("input");
+    SEARCH_INPUT.change((e) => {
         if (!$(e.target).val()) {
             showCustomScroller();
         } else {
@@ -139,7 +141,7 @@ function getEmojisForServer(server) {
 function buildScrollerWrap() {
     const s = SCROLLER_WRAP || $(ELEMENT_SCROLLER_WRAP);
     const scr = s.find(".scroller");
-    scr.html(" ");
+    scr.html(" ").off("click").off("mouseenter").off("mouseleave");
 
     const c = getCurrentServer();
     // Append all current server emojis, if any
@@ -167,7 +169,24 @@ function buildScrollerWrap() {
         contentElem: scr[0]
     });
 
-    window.better_emojis.current_cluster.refresh();
+    const emojiClickHandler = $(".channel-textarea-emoji").hasClass("popout-open") ? putEmojiInTextarea : addCurrentMessageReaction;
+
+    scr.on('click', '.emoji-item', e => { console.log("Selected emoji - ", currentPickerEmojiRegistry[$(e.target).attr("data-emoji")]) })
+        .on('click', '.emoji-item', e => { emojiClickHandler(currentPickerEmojiRegistry[$(e.target).attr("data-emoji")]) })
+        .on('mouseenter', '.emoji-item', e => {
+            $(e.target).addClass("selected");
+            if (SEARCH_INPUT) {
+                SEARCH_INPUT.attr("placeholder", emojiInTextarea(currentPickerEmojiRegistry[$(e.target).attr("data-emoji")]));
+            }
+        })
+        .on('mouseleave', '.emoji-item', e => {
+            $(e.target).removeClass("selected");
+            if (SEARCH_INPUT) {
+                SEARCH_INPUT.attr("placeholder", "Find the perfect emoji");
+            }
+        });
+
+    console.log("asdasd");
 
     return s;
 }
@@ -198,26 +217,11 @@ function isCurrentSelectedServer(server) {
 function buildEmojisRows(eL) {
     const s = $("<span class=\"tl-emoji-list\"></span>");
     let r = $(ELEMENT_SERVER_EMOJI_LIST_ROW);
-    const emojiClickHandler = $(".channel-textarea-emoji").hasClass("popout-open") ? putEmojiInTextarea : addCurrentMessageReaction;
 
-    function emojiElement(emoji, cb) {
+    function emojiElement(emoji) {
         return $(ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY)
             .css("background-image", `url("${emoji.url}")`)
-            .click(() => {
-                console.log(`Selected emoji - ${emojiInTextarea(emoji)}`);
-            })
-            .click(() => { cb(emoji) })
-            .hover(function() {
-                $(this).addClass("selected");
-                if (SEARCH_INPUT) {
-                    SEARCH_INPUT.attr("placeholder", emojiInTextarea(emoji));
-                }
-            }, function() {
-                $(this).removeClass("selected");
-                if (SEARCH_INPUT) {
-                    SEARCH_INPUT.attr("placeholder", "Find the perfect emoji");
-                }
-            });
+            .attr("data-emoji", `${currentPickerEmojiRegistry.push(emoji) - 1}`);
     }
 
     for (const i in eL) {
@@ -226,7 +230,7 @@ function buildEmojisRows(eL) {
             s.append(r);
             r = $(ELEMENT_SERVER_EMOJI_LIST_ROW);
         }
-        r.append(emojiElement(eL[i], emojiClickHandler));
+        r.append(emojiElement(eL[i]));
     }
     s.append(r);
 
@@ -462,19 +466,25 @@ function addCustomScrollerParts() {
     setTimeout(showCustomScroller, 30);
 }
 
-const EMOJI_PICKER_OBSERVER = watchForEmojiPickerChange(mutations => {
-    for (const i in mutations) {
-        if (mutations[i].type === "childList") {
-            if (mutations[i].addedNodes.length > 0) {
+var EMOJI_PICKER_OBSERVER;
+
+setTimeout(2000, () => {
+    EMOJI_PICKER_OBSERVER = watchForEmojiPickerChange([mutation] => {
+        if (mutation.type === "childList") {
+            if (mutation.addedNodes.length > 0) {
                 if ($(EMOJI_PICKER_PATH).find(".emoji-picker").length &&
                     ($(".channel-textarea-emoji").hasClass("popout-open") || $(".btn-reaction.popout-open").length)) {
                     addCustomScrollerParts();
                 }
                 // replaceScroller();
-            } else if (mutations[i].removedNodes.length) {
+            }
+            if (mutation.removedNodes.length) {
+                if (window.better_emojis.current_cluster) {
+                    window.better_emojis.current_cluster.destroy();
+                }
                 // console.log("picker closed");
             }
             break;
         }
-    }
+    })
 });
