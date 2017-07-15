@@ -1,0 +1,14 @@
+[
+	{
+		"type": "script",
+		"url": "https://raw.githubusercontent.com/TrueLecter/BetterDiscordEmojis/master/jquery.js"
+	},
+	{
+		"type": "script",
+		"url": "https://raw.githubusercontent.com/TrueLecter/BetterDiscordEmojis/master/clusterize.js"
+	},
+	{
+		"type": "script",
+		"url": "https://raw.githubusercontent.com/TrueLecter/BetterDiscordEmojis/master/better-emojis.js"	
+	}
+]
