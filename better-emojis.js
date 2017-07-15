@@ -222,7 +222,7 @@ function buildEmojisRows(eL) {
     }
     s.append(r);
 
-    return s;
+    return s.html();
 }
 
 function buildServerSpan(server) {
@@ -234,7 +234,7 @@ function buildServerSpan(server) {
 
     s.append(buildEmojisRows(eL));
 
-    return s;
+    return s.html();
 }
 
 function putEmojiInTextarea(emoji) {
@@ -343,7 +343,7 @@ function loadStandartEmojis() {
     return new Promise((resolve, reject) => {
         const translation = TRANSLATION_MODULE.Messages;
         const categories = EMOJI_STORAGE_MODULE.getCategories();
-        commonEmojisSpansCache = $("<span></span>");
+        let commonEmojisSpansCacheSpan = $("<span></span>");
 
         for (let category of categories) {
             const fakeServer = { sharedEmojis: [], name: translation[`EMOJI_CATEGORY_${category.toUpperCase()}`] };
@@ -363,8 +363,10 @@ function loadStandartEmojis() {
             }
 
             commonEmojis.push(fakeServer);
-            commonEmojisSpansCache.append(buildServerSpan(fakeServer));
+            commonEmojisSpansCacheSpan.append(buildServerSpan(fakeServer));
         }
+
+        commonEmojisSpansCache = commonEmojisSpansCacheSpan.html();
 
         resolve(commonEmojis);
     });
