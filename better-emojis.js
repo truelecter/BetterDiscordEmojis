@@ -160,6 +160,14 @@ function buildScrollerWrap() {
         scr.append(commonEmojisSpansCache);
     }
 
+    window.better_emojis.current_cluster = new Clusterize({
+        rows_in_block: 10,
+        blocks_in_cluster: 3,
+        scrollElem: scr[0],
+        contentElem: scr[0]
+    });
+
+    window.better_emojis.current_cluster.refresh();
 
     return s;
 }
@@ -251,20 +259,29 @@ function getEmojiUrl(emoji) {
 }
 
 function getServers() {
-    return $.ajax({
-        "async": true,
-        "url": `${API_BASE}/users/@me/guilds`,
-        "method": "GET"
-    })
+    return new Promise((resolve, reject) => {
+        $.ajax({
+                "async": true,
+                "url": `${API_BASE}/users/@me/guilds`,
+                "method": "GET"
+            })
+            .then(res => resolve(res))
+            .fail(err => reject(err));
+    });
 }
 
 function getMyId() {
-    return $.ajax({
-        "async": true,
-        "url": `${API_BASE}/users/@me`,
-        "method": "GET"
-    }).then(response => {
-        MY_ID = response.id;
+    return new Promise((resolve, reject) => {
+        $.ajax({
+                "async": true,
+                "url": `${API_BASE}/users/@me`,
+                "method": "GET"
+            })
+            .then(response => {
+                MY_ID = response.id;
+            })
+            .then(res => resolve(res))
+            .fail(err => reject(err));
     });
 }
 
@@ -387,8 +404,8 @@ function doGetEmojis() {
         .then(getServers)
         .then(parseServers)
         .then(loadStandartEmojis)
-        // .catch(e => { console.error("Error initializing Better Emojis!\nProbably modules order has been changed\n", e) })
         .then(() => { console.log("Better Emojis initialized") })
+        .catch(e => { console.error("Error initializing Better Emojis!\nProbably modules order has been changed\n", e) })
 }
 
 doGetEmojis();
