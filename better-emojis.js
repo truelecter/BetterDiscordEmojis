@@ -169,22 +169,21 @@ function buildScrollerWrap () {
 
   const emojiClickHandler = $('.channel-textarea-emoji').hasClass('popout-open') ? putEmojiInTextarea : addCurrentMessageReaction
 
-  scr.on('click', '.emoji-item', e => { console.log('Selected emoji - ', currentPickerEmojiRegistry[$(e.target).attr('data-emoji')]) })
-        .on('click', '.emoji-item', e => { emojiClickHandler(currentPickerEmojiRegistry[$(e.target).attr('data-emoji')]) })
-        .on('mouseenter', '.emoji-item', e => {
-          $(e.target).addClass('selected')
-          if (SEARCH_INPUT) {
-            SEARCH_INPUT.attr('placeholder', emojiInTextarea(currentPickerEmojiRegistry[$(e.target).attr('data-emoji')]))
-          }
-        })
-        .on('mouseleave', '.emoji-item', e => {
-          $(e.target).removeClass('selected')
-          if (SEARCH_INPUT) {
-            SEARCH_INPUT.attr('placeholder', 'Find the perfect emoji')
-          }
-        })
-
-  console.log('asdasd')
+  scr
+    .on('click', '.emoji-item', e => { console.log('Selected emoji - ', currentPickerEmojiRegistry[$(e.target).attr('data-emoji')]) })
+    .on('click', '.emoji-item', e => { emojiClickHandler(currentPickerEmojiRegistry[$(e.target).attr('data-emoji')]) })
+    .on('mouseenter', '.emoji-item', e => {
+      $(e.target).addClass('selected')
+      if (SEARCH_INPUT) {
+        SEARCH_INPUT.attr('placeholder', emojiInTextarea(currentPickerEmojiRegistry[$(e.target).attr('data-emoji')]))
+      }
+    })
+    .on('mouseleave', '.emoji-item', e => {
+      $(e.target).removeClass('selected')
+      if (SEARCH_INPUT) {
+        SEARCH_INPUT.attr('placeholder', 'Find the perfect emoji')
+      }
+    })
 
   return s
 }
@@ -444,9 +443,6 @@ function addCustomScrollerParts () {
       const $this = $(this)
 
       categoriesChildren.removeClass('selected')
-
-            // this.target.classList.add('selected');
-            // Uncaught TypeError: Cannot read property 'classList' of undefined
       $this.addClass('selected')
 
       customScroller.forEach(function (category) {
@@ -471,13 +467,11 @@ setTimeout(() => {
                     ($('.channel-textarea-emoji').hasClass('popout-open') || $('.btn-reaction.popout-open').length)) {
           addCustomScrollerParts()
         }
-                // replaceScroller();
       }
       if (mutation.removedNodes.length) {
         if (window.better_emojis.current_cluster) {
           window.better_emojis.current_cluster.destroy()
         }
-                // console.log("picker closed");
       }
     }
   })
