@@ -221,8 +221,7 @@ function buildEmojisRows (eL) {
             .attr('data-emoji', `${currentPickerEmojiRegistry.push(emoji) - 1}`)
   }
 
-  for (const i in eL) {
-        // console.log(i, eL);
+  for (let i = 0; i < eL.length; i++) {
     if ((i !== 0) && (i % 10 === 0)) {
       s.append(r)
       r = $(ELEMENT_SERVER_EMOJI_LIST_ROW)
