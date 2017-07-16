@@ -73,9 +73,9 @@ function replaceScroller () {
 }
 
 function replaceSearchInput () {
-    // SEARCH_INPUT = buildSearchInput();
-    // $(EMOJI_PICKER_PATH).find("input").hide().before(SEARCH_INPUT);
-    // Temporary disabled, as original search have much better performance
+  // SEARCH_INPUT = buildSearchInput();
+  // $(EMOJI_PICKER_PATH).find("input").hide().before(SEARCH_INPUT);
+  // Temporary disabled, as original search have much better performance
   SEARCH_INPUT = $(EMOJI_PICKER_PATH).find('input')
   SEARCH_INPUT.change((e) => {
     if (!$(e.target).val()) {
@@ -266,8 +266,8 @@ function getServers () {
       'url': `${API_BASE}/users/@me/guilds`,
       'method': 'GET'
     })
-            .then(res => resolve(res))
-            .fail(err => reject(err))
+    .then(res => resolve(res))
+    .fail(err => reject(err))
   })
 }
 
@@ -278,11 +278,11 @@ function getMyId () {
       'url': `${API_BASE}/users/@me`,
       'method': 'GET'
     })
-            .then(response => {
-              MY_ID = response.id
-            })
-            .then(res => resolve(res))
-            .fail(err => reject(err))
+    .then(response => {
+      MY_ID = response.id
+    })
+    .then(res => resolve(res))
+    .fail(err => reject(err))
   })
 }
 
@@ -293,15 +293,14 @@ function parseServer (server) {
       'url': `${API_BASE}/guilds/${server.id}/members/${MY_ID}`,
       'method': 'GET'
     }).done(response => {
-            // fill base server info
-            // console.log(server.id, response, response.roles);
+      // fill base server info
       const srv = {}
       srv.roles = response.roles
       srv.id = server.id
       srv.emojis = []
       srv.sharedEmojis = []
       srv.permissions = server.permissions
-            // test if we can use custom emojis on this server
+      // test if we can use custom emojis on this server
       srv.canUserSharedEmojis = ((srv.permissions & 0x00040000) !== 0)
 
       $.ajax({
@@ -309,15 +308,14 @@ function parseServer (server) {
         'url': `${API_BASE}/guilds/${srv.id}`,
         'method': 'GET'
       }).done(response => {
-                // console.log(response.emojis);
-                // now we got detailed info about server. fill emoji and managed emojis.
-                // also set name
+        // now we got detailed info about server. fill emoji and managed emojis.
+        // also set name
         srv.name = response.name
 
         response.emojis.forEach(emoji => {
-                    // get emoji required roles
+          // get emoji required roles
           const eR = emoji.roles
-                    // no roles required for emoji
+          // no roles required for emoji
           emoji.url = getEmojiUrl(emoji)
           if (!eR.length) {
             srv.emojis.push(emoji)
@@ -327,8 +325,8 @@ function parseServer (server) {
             return
           }
           for (const r in eR) {
-                        // we have required role
-                        // console.log(srv.roles, eR, srv.roles.indexOf(eR[i]));
+            // we have required role
+            // console.log(srv.roles, eR, srv.roles.indexOf(eR[i]));
             if (srv.roles.includes(r)) {
               srv.emojis.push(emoji)
               if (emoji.managed) {
@@ -338,7 +336,7 @@ function parseServer (server) {
             }
           }
         })
-                // save server info
+        // save server info
         servers.push(srv)
         resolve(srv)
       })
@@ -402,11 +400,11 @@ function doGetEmojis () {
   })
 
   getMyId()
-        .then(getServers)
-        .then(parseServers)
-        .then(loadStandartEmojis)
-        .then(() => { console.log('Better Emojis initialized') })
-        .catch(e => { console.error('Error initializing Better Emojis!\nProbably modules order has been changed\n', e) })
+    .then(getServers)
+    .then(parseServers)
+    .then(loadStandartEmojis)
+    .then(() => { console.log('Better Emojis initialized') })
+    .catch(e => { console.error('Error initializing Better Emojis!\nProbably modules order has been changed\n', e) })
 }
 
 doGetEmojis()
@@ -465,7 +463,7 @@ function addCustomScrollerParts () {
 
 var EMOJI_PICKER_OBSERVER
 
-setTimeout(2000, () => {
+setTimeout(() => {
   EMOJI_PICKER_OBSERVER = watchForEmojiPickerChange(([mutation]) => {
     if (mutation.type === 'childList') {
       if (mutation.addedNodes.length > 0) {
@@ -483,4 +481,4 @@ setTimeout(2000, () => {
       }
     }
   })
-})
+}, 2000)
