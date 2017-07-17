@@ -1,0 +1,34 @@
+{
+  "name": "better-discord-emojis",
+  "private": true,
+  "version": "0.1.1",
+  "description": "Modified emoji picker for Discord",
+  "main": "index.js",
+  "scripts": {
+    "watch": "watchify src/main.js -o dist/better-emojis.js --debug",
+    "build": "npm-run-all -s mkdir bundle uglify",
+    "mkdir": "mkdirp dist/map",
+    "bundle": "browserify src/main.js --debug | exorcist dist/map/better-emojis.js.map > dist/better-emojis.js",
+    "uglify": "uglifyjs dist/better-emojis.js --in-source-map dist/map/better-emojis.js.map --source-map dist/map/better-emojis.min.js.map -o dist/better-emojis.min.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TrueLecter/BetterDiscordEmojis.git"
+  },
+  "author": "_TrueLecter_ <andrew.panassiouk@gmail.com> (http://minuette.ru)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TrueLecter/BetterDiscordEmojis/issues"
+  },
+  "homepage": "https://github.com/TrueLecter/BetterDiscordEmojis#readme",
+  "dependencies": {
+    "browserify": "^14.4.0",
+    "exorcist": "^0.4.0",
+    "mkdirp": "^0.5.1",
+    "npm-run-all": "^4.0.2",
+    "uglify-js-es6": "^2.8.9"
+  },
+  "devDependencies": {
+    "watchify": "^3.9.0"
+  }
+}

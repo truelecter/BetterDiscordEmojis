@@ -11,7 +11,7 @@ const serverRegex = Symbol('serverRegex')
 
 class Server {
   constructor (_id, _name, _permissions, _emojis = [], _sharedEmojis = []) {
-    if (GLOBAL_SERVER_LIST.map(s => s.id).includes(_id)) {
+    if (GLOBAL_SERVER_LIST.some(s => s.id === _id)) {
       throw new Error('Cannot have multiple servers with same id!')
     }
 
@@ -60,11 +60,11 @@ class Server {
   }
 
   get emojis () {
-    return [...this[emojis]]
+    return this[emojis]
   }
 
   get sharedEmojis () {
-    return [...this[sharedEmojis]]
+    return this[sharedEmojis]
   }
 
   isCurrent () {
@@ -94,7 +94,7 @@ class Server {
   }
 
   static getAllServers () {
-    return [...GLOBAL_SERVER_LIST]
+    return GLOBAL_SERVER_LIST
   }
 
   static getById (id) {

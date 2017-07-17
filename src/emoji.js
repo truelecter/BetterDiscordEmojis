@@ -36,7 +36,7 @@ class Emoji {
   }
 
   get roles () {
-    return [...this[roles]]
+    return this[roles]
   }
 
   get useName () {
