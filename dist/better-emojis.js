@@ -677,7 +677,7 @@ function findReact (dom) {
 function getSelectedMessageId () {
   try {
     return Constants.REACTION_POPOUT_REGEX.exec(
-            findReact($('.btn-reaction.popout-open').parent().get(0))
+            findReact($('.btn-reaction.popout-open').closest('.message').find('.message-text').get(0))
             ._currentElement.props.children
             .filter(c => {
               return Object.keys(c.props).includes('subscribeTo')
