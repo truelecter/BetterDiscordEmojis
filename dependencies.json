@@ -1,10 +1,10 @@
 [
 	{
 		"type": "script",
-		"url": "https://raw.githubusercontent.com/TrueLecter/BetterDiscordEmojis/master/jquery.js"
+		"url": "https://raw.githubusercontent.com/TrueLecter/BetterDiscordEmojis/master/dist/jquery.js"
 	},
 	{
 		"type": "script",
-		"url": "https://raw.githubusercontent.com/TrueLecter/BetterDiscordEmojis/master/better-emojis.min.js"	
+		"url": "https://raw.githubusercontent.com/TrueLecter/BetterDiscordEmojis/master/dist/better-emojis.min.js"	
 	}
 ]
