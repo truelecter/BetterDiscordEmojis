@@ -5,6 +5,8 @@ const managed = Symbol('managed')
 const requireColons = Symbol('requireColons')
 const roles = Symbol('roles')
 
+const GLOBAL_EMOJI_MAP = new Map()
+
 class Emoji {
   constructor (_id, _name, _managed = false, _requireColons = true, _roles = [], _url = `https://cdn.discordapp.com/emojis/${_id}.png`) {
     this[id] = _id
@@ -13,6 +15,8 @@ class Emoji {
     this[managed] = _managed
     this[requireColons] = _requireColons
     this[roles] = _roles
+
+    GLOBAL_EMOJI_MAP.set(this[id], this)
   }
 
   get id () {
@@ -45,6 +49,10 @@ class Emoji {
 
   static fromRaw (emojiRaw) {
     return new Emoji(emojiRaw.id, emojiRaw.name, emojiRaw.managed, emojiRaw.requireColons, emojiRaw.roles)
+  }
+
+  static getById (id) {
+    return GLOBAL_EMOJI_MAP.get(id)
   }
 }
 

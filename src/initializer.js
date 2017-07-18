@@ -92,7 +92,7 @@ function loadStandartEmojis () {
       const emojis = Constants.EMOJI_STORAGE_MODULE.getByCategory(category)
 
       for (let emoji of emojis) {
-        fakeServer.addEmoji(new Emoji(emoji.index, emoji.uniqueName, emoji.managed, emoji.allNamesString.includes(':'), [], emoji.defaultUrl))
+        fakeServer.addEmoji(new Emoji(emoji.uniqueName, emoji.uniqueName, emoji.managed, emoji.allNamesString.includes(':'), [], emoji.defaultUrl))
       }
 
       commonEmojis.push(fakeServer)

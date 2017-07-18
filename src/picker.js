@@ -1,9 +1,9 @@
 const Constants = require('./constants.js')
 const Clusterize = require('./lib/clusterize.js')
+const Emoji = require('./emoji.js')
 const Server = require('./server.js')
 
 let commonEmojisSpansCache = ''
-let currentPickerEmojiRegistry = []
 
 let SCROLLER_WRAP = null
 let SCROLLER_WRAP_OLD = null
@@ -14,13 +14,12 @@ function buildScrollerWrap () {
   const scr = s.find('.scroller')
 
   scr.html(' ').off('click').off('mouseenter').off('mouseleave')
-  currentPickerEmojiRegistry.length = 0
 
   const c = Server.getCurrentServer()
-    // Append all current server emojis, if any
+  // Append all current server emojis, if any
   if (c.emojis.length > 0) { scr.append(buildServerSpan(c)) }
 
-    // Append all other server shared emojis
+  // Append all other server shared emojis
   if (c.canUseExternalEmojis) {
     for (const server of Server.getAllServers()) {
       if (!server.isCurrent() && server.sharedEmojis.length > 0 && Constants.IS_NUMBER_REGEX.test(server.id)) {
@@ -29,7 +28,7 @@ function buildScrollerWrap () {
     }
   }
 
-    // Append common emojis
+  // Append common emojis
   if (commonEmojisSpansCache) {
     scr.append(commonEmojisSpansCache)
   }
@@ -44,12 +43,12 @@ function buildScrollerWrap () {
   const emojiClickHandler = $('.channel-textarea-emoji').hasClass('popout-open') ? putEmojiInTextarea : addCurrentMessageReaction
 
   scr
-    .on('click', '.emoji-item', e => { console.log('Selected emoji - ', currentPickerEmojiRegistry[$(e.target).attr('data-emoji')]) })
-    .on('click', '.emoji-item', e => { emojiClickHandler(currentPickerEmojiRegistry[$(e.target).attr('data-emoji')]) })
+    .on('click', '.emoji-item', e => { console.log('Selected emoji - ', Emoji.getById($(e.target).attr('data-emoji'))) })
+    .on('click', '.emoji-item', e => { emojiClickHandler(Emoji.getById($(e.target).attr('data-emoji'))) })
     .on('mouseenter', '.emoji-item', e => {
       $(e.target).addClass('selected')
       if (SEARCH_INPUT) {
-        SEARCH_INPUT.attr('placeholder', currentPickerEmojiRegistry[$(e.target).attr('data-emoji')].useName)
+        SEARCH_INPUT.attr('placeholder', Emoji.getById($(e.target).attr('data-emoji')).useName)
       }
     })
     .on('mouseleave', '.emoji-item', e => {
@@ -78,7 +77,7 @@ function buildEmojisRows (eL) {
   const emojiElement = function (emoji) {
     return $(Constants.ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY)
             .css('background-image', `url("${emoji.url}")`)
-            .attr('data-emoji', `${currentPickerEmojiRegistry.push(emoji) - 1}`)
+            .attr('data-emoji', `${emoji.id}`)
   }
 
   for (let i = 0; i < eL.length; i++) {
