@@ -11,7 +11,7 @@
     "bundle": "browserify src/main.js --debug | exorcist deploy/map/better-emojis.js.map > deploy/better-emojis.js",
     "uglify": "uglifyjs deploy/better-emojis.js --in-source-map deploy/map/better-emojis.js.map --source-map deploy/map/better-emojis.min.js.map -o deploy/better-emojis.min.js",
     "deploy": "npm-run-all -s build push",
-    "push": "git show --format=format:\"Deploy for commit %H\" -s > deploy/commit-message && cd deploy && git add * && git commit -F commit-message && git push",
+    "push": "git show --format=format:\"Deploy for commit %H\" -s > deploy/commit-message && cd deploy && git add * && git commit -F commit-message && git push"
   },
   "repository": {
     "type": "git",
