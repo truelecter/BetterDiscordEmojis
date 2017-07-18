@@ -23,7 +23,7 @@ function buildScrollerWrap () {
     // Append all other server shared emojis
   if (c.canUseExternalEmojis) {
     for (const server of Server.getAllServers()) {
-      if (!server.isCurrent() && server.sharedEmojis.length > 0) {
+      if (!server.isCurrent() && server.sharedEmojis.length > 0 && Constants.IS_NUMBER_REGEX.test(server.id)) {
         scr.append(buildServerSpan(server))
       }
     }

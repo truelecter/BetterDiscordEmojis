@@ -14,7 +14,7 @@ function watchForEmojiPickerChange (listener) {
 }
 
 initEmojis().then((spanCache) => {
-  Picker.setCommonEmojiSpanCache(spanCache)
+  Picker.setCommonEmojiSpanCache(spanCache.spanCache)
   console.log('Better Emojis initialized')
   setTimeout(() => {
     window.better_emojis.observer = watchForEmojiPickerChange(([mutation]) => {

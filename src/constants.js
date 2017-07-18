@@ -23,3 +23,5 @@ module.exports.ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY = '<div class="emoji-item"></
 module.exports.REACTION_POPOUT_REGEX = /TOGGLE_REACTION_POPOUT_(\d+)/
 module.exports.CURRENT_SELECTED_CHANNEL_REGEX = /.*\/.+\/(\d+)/
 module.exports.IS_INBOX_REGEX = /\/channels\/@me\/\d+/
+
+module.exports.IS_NUMBER_REGEX = /\d+/
