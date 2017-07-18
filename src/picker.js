@@ -157,11 +157,9 @@ function replaceSearchInput () {
   SEARCH_INPUT.on('change keydown keyup paste', () => {
     let r = picker.find('.scroller-wrap, .no-search-results')
     if (SEARCH_INPUT.val()) {
-      console.log('f h, s s')
       r.filter('.tl-emoji-scroller-wrap').hide()
       r.not('.tl-emoji-scroller-wrap').show()
     } else {
-      console.log('f s, s h')
       r.filter('.tl-emoji-scroller-wrap').show()
       r.not('.tl-emoji-scroller-wrap').hide()
     }

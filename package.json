@@ -5,11 +5,13 @@
   "description": "Modified emoji picker for Discord",
   "main": "index.js",
   "scripts": {
-    "watch": "watchify src/main.js -o dist/better-emojis.js --debug",
+    "watch": "watchify src/main.js -o deploy/better-emojis.js --debug",
     "build": "npm-run-all -s mkdir bundle uglify",
-    "mkdir": "mkdirp dist/map",
-    "bundle": "browserify src/main.js --debug | exorcist dist/map/better-emojis.js.map > dist/better-emojis.js",
-    "uglify": "uglifyjs dist/better-emojis.js --in-source-map dist/map/better-emojis.js.map --source-map dist/map/better-emojis.min.js.map -o dist/better-emojis.min.js"
+    "mkdir": "mkdirp deploy/map",
+    "bundle": "browserify src/main.js --debug | exorcist deploy/map/better-emojis.js.map > deploy/better-emojis.js",
+    "uglify": "uglifyjs deploy/better-emojis.js --in-source-map deploy/map/better-emojis.js.map --source-map deploy/map/better-emojis.min.js.map -o deploy/better-emojis.min.js",
+    "deploy": "npm-run-all -s build push",
+    "push": "git show --format=format:\"Deploy for commit %H\" -s > deploy/commit-message && cd deploy && git add * && git commit -F commit-message && git push",
   },
   "repository": {
     "type": "git",
