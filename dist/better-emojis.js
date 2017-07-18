@@ -13,7 +13,7 @@ module.exports.TRANSLATION_MODULE = n(3)
 module.exports.TOKEN_KEY = n(0).TOKEN_KEY
 /* May be changed with discord updates.END */
 
-module.exports.ELEMENT_SCROLLER_WRAP = '<div class="scroller-wrap"><div class="scroller"></div></div>'
+module.exports.ELEMENT_SCROLLER_WRAP = '<div class="scroller-wrap tl-emoji-scroller-wrap"><div class="scroller"></div></div>'
 
 module.exports.ELEMENT_SEARCH_INPUT = '<input type="text" placeholder="Find the perfect emoji" value="">'
 
@@ -709,7 +709,7 @@ function addMessageReaction (channel, message, emoji) {
 }
 
 function showOriginalScroller () {
-  SCROLLER_WRAP.hide()
+  SCROLLER_WRAP.hide().parent()
   SCROLLER_WRAP_OLD.show()
 }
 
@@ -729,12 +729,18 @@ function replaceSearchInput () {
   // SEARCH_INPUT = buildSearchInput();
   // $(EMOJI_PICKER_PATH).find("input").hide().before(SEARCH_INPUT);
   // Temporary disabled, as original search have much better performance
+  let picker = $(Constants.EMOJI_PICKER_PATH)
   SEARCH_INPUT = $(Constants.EMOJI_PICKER_PATH).find('input')
-  SEARCH_INPUT.change((e) => {
-    if (!$(e.target).val()) {
-      showCustomScroller()
+  SEARCH_INPUT.on('change keydown keyup paste', () => {
+    let r = picker.find('.scroller-wrap, .no-search-results')
+    if (SEARCH_INPUT.val()) {
+      console.log('f h, s s')
+      r.filter('.tl-emoji-scroller-wrap').hide()
+      r.not('.tl-emoji-scroller-wrap').show()
     } else {
-      showOriginalScroller()
+      console.log('f s, s h')
+      r.filter('.tl-emoji-scroller-wrap').show()
+      r.not('.tl-emoji-scroller-wrap').hide()
     }
   })
 }

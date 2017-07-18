@@ -12,7 +12,7 @@ module.exports.TRANSLATION_MODULE = n(3)
 module.exports.TOKEN_KEY = n(0).TOKEN_KEY
 /* May be changed with discord updates.END */
 
-module.exports.ELEMENT_SCROLLER_WRAP = '<div class="scroller-wrap"><div class="scroller"></div></div>'
+module.exports.ELEMENT_SCROLLER_WRAP = '<div class="scroller-wrap tl-emoji-scroller-wrap"><div class="scroller"></div></div>'
 
 module.exports.ELEMENT_SEARCH_INPUT = '<input type="text" placeholder="Find the perfect emoji" value="">'
 
