@@ -12,8 +12,11 @@ function attachPickerObserver() {
 	} else {
 		window.better_emojis.pickerObserver = new Observer(null,
 			() => {
-				if ($(EMOJI_PICKER_PATH).find('.emoji-picker').length &&
-					($('.channel-textarea-emoji').hasClass('popout-open') || $('.btn-reaction.popout-open').length)) {
+				let isPickerOpened = !!$(EMOJI_PICKER_PATH).find('.emoji-picker').length;
+				let isInlineOrTextareaPicker =
+					$('.channel-textarea-emoji').hasClass('popout-open') ||
+					!!$('.btn-reaction.popout-open').length;
+				if (isPickerOpened && isInlineOrTextareaPicker) {
 					Picker.show();
 				}
 			},

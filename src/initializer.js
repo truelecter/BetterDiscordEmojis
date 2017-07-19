@@ -3,7 +3,7 @@
 const Server = require('./server.js');
 const Emoji = require('./emoji.js');
 const Picker = require('./picker.js');
-const { fetchURL } = require();
+const { fetchURL } = require('./helpers.js');
 const {
 	API_BASE,
 	TOKEN_KEY,
