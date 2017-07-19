@@ -731,7 +731,7 @@ class ChildAddRemoveObserver {
 	}
 
 	on(evt, listener) {
-		if (typeof listener === 'function') {
+		if (typeof listener !== 'function') {
 			throw new TypeError('Listener must be function');
 		}
 
