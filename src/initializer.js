@@ -1,121 +1,139 @@
-const Server = require('./server.js')
-const Emoji = require('./emoji.js')
-const Constants = require('./constants.js')
-const Picker = require('./picker.js')
+'use strict';
 
-let MY_ID = ''
+const Server = require('./server.js');
+const Emoji = require('./emoji.js');
+const Picker = require('./picker.js');
+const { fetchURL } = require();
+const {
+	API_BASE,
+	TOKEN_KEY,
+	TRANSLATION_MODULE,
+	EMOJI_STORAGE_MODULE,
+	LOCAL_STORAGE_MODULE
+} = require('./constants.js');
 
-function getServers () {
-  return new Promise((resolve, reject) => {
-    $.ajax({
-      'async': true,
-      'url': `${Constants.API_BASE}/users/@me/guilds`,
-      'method': 'GET'
-    })
-    .then(res => resolve(res))
-    .fail(err => reject(err))
-  })
+let MY_ID = '';
+
+function getServers() {
+	return fetchURL({
+		url: `${API_BASE}/users/@me/guilds`,
+		dataType: 'json'
+	});
 }
 
-function getMyId () {
-  return new Promise((resolve, reject) => {
-    $.ajax({
-      'async': true,
-      'url': `${Constants.API_BASE}/users/@me`,
-      'method': 'GET'
-    })
-    .then(response => {
-      MY_ID = response.id
-    })
-    .then(res => resolve(res))
-    .fail(err => reject(err))
-  })
+function getMyId() {
+	return fetchURL({
+		url: `${API_BASE}/users/@me`,
+		dataType: 'json'
+	})
+	.then((response) => {
+		MY_ID = response.id;
+
+		return response;
+	});
 }
 
-function parseServer (server) {
-  return new Promise((resolve, reject) => {
-    $.ajax({
-      'async': true,
-      'url': `${Constants.API_BASE}/guilds/${server.id}/members/${MY_ID}`,
-      'method': 'GET'
-    }).done(response => {
-      const myRoles = response.roles
-      $.ajax({
-        'async': true,
-        'url': `${Constants.API_BASE}/guilds/${server.id}`,
-        'method': 'GET'
-      }).done(response => {
-        // now we got detailed info about server. fill emoji and managed emojis.
-        // also set name
-        const srv = new Server(response.id, response.name, server.permissions)
+function parseServer({ id: serverId, permissions: serverPermissions }) {
+	return fetchURL({
+		url: `${API_BASE}/guilds/${serverId}/members/${MY_ID}`,
+		dataType: 'json'
+	})
+	.then(({ roles }) => (
+		fetchURL({
+			url: `${API_BASE}/guilds/${serverId}`,
+			dataType: 'json'
+		})
+		.then(({ id, name, emojis }) => ({
+			id,
+			name,
+			roles,
+			emojis
+		}))
+	))
+	.then(({ id, name, emojis, roles }) => {
+		// now we got detailed info about server. fill emoji and managed emojis.
+		// also set name
+		const server = new Server(id, name, serverPermissions);
 
-        response.emojis.forEach(emojiRaw => {
-          // get emoji required roles
-          const emoji = Emoji.fromRaw(emojiRaw)
-          const eR = emoji.roles
+		for (const emoji of emojis.map(Emoji.fromRaw)) {
+			const emojiRoles = emoji.roles;
 
-          if (!eR.length) {
-            srv.addEmoji(emoji)
-            return
-          }
+			if (!emojiRoles.length) {
+				server.addEmoji(emoji);
 
-          for (const r in eR) {
-            // we have required role
-            if (myRoles.includes(r)) {
-              srv.addEmoji(emoji)
-              break
-            }
-          }
-        })
-        resolve(srv)
-      })
-    })
-  })
+				continue;
+			}
+
+			for (const role of emojiRoles) {
+				if (roles.includes(role)) {
+					server.addEmoji(emoji);
+
+					break;
+				}
+			}
+		}
+
+		return server;
+	});
 }
 
-function parseServers (serversA) {
-  return Promise.all(serversA.map(srv => parseServer(srv)))
+function parseServers(serversA) {
+	return Promise.all(serversA.map(parseServer));
 }
 
-function loadStandartEmojis () {
-  let commonEmojis = []
+function loadStandartEmojis() {
+	let commonEmojis = [];
 
-  return new Promise((resolve, reject) => {
-    const translation = Constants.TRANSLATION_MODULE.Messages
-    const categories = Constants.EMOJI_STORAGE_MODULE.getCategories()
-    let commonEmojisSpansCacheSpan = $('<span></span>')
+	const translation = TRANSLATION_MODULE.Messages;
+	const categories = EMOJI_STORAGE_MODULE.getCategories();
+	let $commonEmojisSpansCacheSpan = $('<span></span>');
 
-    for (let category of categories) {
-      const tr = translation[`EMOJI_CATEGORY_${category.toUpperCase()}`]
-      const fakeServer = new Server(tr, tr, 0x00040000)
+	for (let category of categories) {
+		const tr = translation[`EMOJI_CATEGORY_${category.toUpperCase()}`];
+		const fakeServer = new Server(tr, tr, 0x00040000);
 
-      const emojis = Constants.EMOJI_STORAGE_MODULE.getByCategory(category)
+		const emojis = EMOJI_STORAGE_MODULE.getByCategory(category);
 
-      for (let emoji of emojis) {
-        fakeServer.addEmoji(new Emoji(emoji.uniqueName, emoji.uniqueName, emoji.managed, emoji.allNamesString.includes(':'), [], emoji.defaultUrl))
-      }
+		for (let emoji of emojis) {
+			fakeServer.addEmoji(
+				new Emoji(
+					emoji.uniqueName,
+					emoji.uniqueName,
+					emoji.managed,
+					emoji.allNamesString.includes(':'),
+					[],
+					emoji.defaultUrl
+				)
+			);
+		}
 
-      commonEmojis.push(fakeServer)
-      commonEmojisSpansCacheSpan.append(Picker.buildServerSpan(fakeServer))
-    }
+		commonEmojis.push(fakeServer);
+		$commonEmojisSpansCacheSpan.append(Picker.buildServerSpan(fakeServer));
+	}
 
-    resolve({emojis: commonEmojis, spanCache: commonEmojisSpansCacheSpan.html()})
-  })
+	return Promise.resolve({
+		emojis: commonEmojis,
+		spanCache: $commonEmojisSpansCacheSpan.html()
+	});
 }
 
-function doGetEmojis () {
-  const token = Constants.LOCAL_STORAGE_MODULE.impl.get(Constants.TOKEN_KEY)
+function doGetEmojis() {
+	const token = LOCAL_STORAGE_MODULE.impl.get(TOKEN_KEY);
 
-  $.ajaxSetup({
-    'crossDomain': true,
-    'headers': { 'authorization': token }
-  })
+	$.ajaxSetup({
+		crossDomain: true,
+		headers: {
+			authorization: token
+		}
+	});
 
-  return getMyId()
-    .then(getServers)
-    .then(parseServers)
-    .then(loadStandartEmojis)
-    .catch(e => { console.error('Error initializing Better Emojis!\nProbably modules order has been changed\n', e) })
+	return getMyId()
+		.then(getServers)
+		.then(parseServers)
+		.then(loadStandartEmojis)
+		.catch(e => {
+			console.error('Error initializing Better Emojis!\nProbably modules order has been changed\n', e);
+		});
 }
 
-module.exports = doGetEmojis
+module.exports = doGetEmojis;
