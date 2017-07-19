@@ -1,9 +1,21 @@
 'use strict';
 
-const Constants = require('./constants.js');
 const Clusterize = require('./lib/clusterize.js');
 const Emoji = require('./emoji.js');
 const Server = require('./server.js');
+
+const { fetchURL } = require('./helpers');
+const {
+	API_BASE,
+	IS_NUMBER_REGEX,
+	EMOJI_PICKER_PATH,
+	ELEMENT_SCROLLER_WRAP,
+	REACTION_POPOUT_REGEX,
+	ELEMENT_SERVER_EMOJI_LIST,
+	ELEMENT_SERVER_EMOJI_LIST_ROW,
+	CURRENT_SELECTED_CHANNEL_REGEX,
+	ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY
+} = require('./constants.js');
 
 let commonEmojisSpansCache = '';
 
@@ -12,99 +24,105 @@ let SCROLLER_WRAP_OLD = null;
 let SEARCH_INPUT = null;
 
 function buildScrollerWrap() {
-	const s = SCROLLER_WRAP || $(Constants.ELEMENT_SCROLLER_WRAP);
-	const scr = s.find('.scroller');
+	const $wrap = SCROLLER_WRAP || $(ELEMENT_SCROLLER_WRAP);
+	const $scr = $wrap.find('.scroller');
 
-	scr.html(' ').off('click').off('mouseenter').off('mouseleave');
+	$scr.html(' ').off('click').off('mouseenter').off('mouseleave');
 
-	const c = Server.getCurrentServer();
+	const currentServer = Server.getCurrentServer();
+
 	// Append all current server emojis, if any
-	if (c.emojis.length > 0) {
-		scr.append(buildServerSpan(c));
+	if (currentServer.emojis.length > 0) {
+		$scr.append(buildServerSpan(currentServer));
 	}
 
 	// Append all other server shared emojis
-	if (c.canUseExternalEmojis) {
+	if (currentServer.canUseExternalEmojis) {
 		for (const server of Server.getAllServers()) {
-			if (!server.isCurrent() && server.sharedEmojis.length > 0 && Constants.IS_NUMBER_REGEX.test(server.id)) {
-				scr.append(buildServerSpan(server));
+			if (!server.isCurrent() && server.sharedEmojis.length > 0 && IS_NUMBER_REGEX.test(server.id)) {
+				$scr.append(buildServerSpan(server));
 			}
 		}
 	}
 
 	// Append common emojis
 	if (commonEmojisSpansCache) {
-		scr.append(commonEmojisSpansCache);
+		$scr.append(commonEmojisSpansCache);
 	}
 
 	window.better_emojis.current_cluster = new Clusterize({
 		rows_in_block: 10,
 		blocks_in_cluster: 3,
-		scrollElem: scr[0],
-		contentElem: scr[0]
+		scrollElem: $scr[0],
+		contentElem: $scr[0]
 	});
 
-	const emojiClickHandler = $('.channel-textarea-emoji').hasClass('popout-open') ? putEmojiInTextarea : addCurrentMessageReaction;
+	const emojiClickHandler = $('.channel-textarea-emoji').hasClass('popout-open')
+		? putEmojiInTextarea
+		: addCurrentMessageReaction;
 
-	scr
-		.on('click', '.emoji-item', e => {
-			console.log('Selected emoji - ', Emoji.getById($(e.target).attr('data-emoji')));
-		})
-		.on('click', '.emoji-item', e => {
-			emojiClickHandler(Emoji.getById($(e.target).attr('data-emoji')));
-		})
-		.on('mouseenter', '.emoji-item', e => {
-			$(e.target).addClass('selected');
-			if (SEARCH_INPUT) {
-				SEARCH_INPUT.attr('placeholder', Emoji.getById($(e.target).attr('data-emoji')).useName);
-			}
-		})
-		.on('mouseleave', '.emoji-item', e => {
-			$(e.target).removeClass('selected');
-			if (SEARCH_INPUT) {
-				SEARCH_INPUT.attr('placeholder', 'Find the perfect emoji');
-			}
-		});
+	$scr
+	.on('click', '.emoji-item', e => {
+		console.log('Selected emoji - ', Emoji.getById($(e.target).attr('data-emoji')));
+	})
+	.on('click', '.emoji-item', e => {
+		emojiClickHandler(Emoji.getById($(e.target).attr('data-emoji')));
+	})
+	.on('mouseenter', '.emoji-item', e => {
+		$(e.target).addClass('selected');
 
-	return s;
+		if (SEARCH_INPUT) {
+			SEARCH_INPUT.attr('placeholder', Emoji.getById($(e.target).attr('data-emoji')).useName);
+		}
+	})
+	.on('mouseleave', '.emoji-item', e => {
+		$(e.target).removeClass('selected');
+
+		if (SEARCH_INPUT) {
+			SEARCH_INPUT.attr('placeholder', 'Find the perfect emoji');
+		}
+	});
+
+	return $wrap;
 }
 
 function buildServerSpan(server) {
-	const s = $(Constants.ELEMENT_SERVER_EMOJI_LIST);
-	s.find('.category').html(server.name);
+	const $emojiList = $(ELEMENT_SERVER_EMOJI_LIST);
 
-	s.append(buildEmojisRows(server.availableEmojis()));
+	$emojiList.find('.category').html(server.name);
+	$emojiList.append(buildEmojisRows(server.availableEmojis()));
 
-	return s.html();
+	return $emojiList.html();
 }
 
 function buildEmojisRows(eL) {
-	const s = $('<span class="tl-emoji-list"></span>');
-	let r = $(Constants.ELEMENT_SERVER_EMOJI_LIST_ROW);
+	const $emojiList = $('<span class="tl-emoji-list"></span>');
+	let $emojiListRow = $(ELEMENT_SERVER_EMOJI_LIST_ROW);
 
 	const emojiElement = function (emoji) {
-		return $(Constants.ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY)
+		return $(ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY)
 			.css('background-image', `url("${emoji.url}")`)
 			.attr('data-emoji', `${emoji.id}`);
 	};
 
 	for (let i = 0; i < eL.length; i++) {
 		if ((i !== 0) && (i % 10 === 0)) {
-			s.append(r);
-			r = $(Constants.ELEMENT_SERVER_EMOJI_LIST_ROW);
+			$emojiList.append($emojiListRow);
+			$emojiListRow = $(ELEMENT_SERVER_EMOJI_LIST_ROW);
 		}
 
-		r.append(emojiElement(eL[i]));
+		$emojiListRow.append(emojiElement(eL[i]));
 	}
 
-	s.append(r);
+	$emojiList.append($emojiListRow);
 
-	return s.html();
+	return $emojiList.html();
 }
 
 function putEmojiInTextarea(emoji) {
-	const textarea = $('.channel-textarea >> textarea');
-	textarea.val(`${textarea.val() + emoji.useName} `);
+	const $textarea = $('.channel-textarea >> textarea');
+
+	$textarea.val($textarea.val() + emoji.useName + ' ');
 }
 
 function findReact(dom) {
@@ -119,19 +137,20 @@ function findReact(dom) {
 
 function getSelectedMessageId() {
 	try {
-		return Constants.REACTION_POPOUT_REGEX.exec(
+		return REACTION_POPOUT_REGEX.exec(
 			findReact($('.btn-reaction.popout-open').closest('.message').find('.message-text').get(0))
 			._currentElement.props.children
-			.filter(c => {
-				return Object.keys(c.props).includes('subscribeTo');
-			})[0].props.subscribeTo)[1];
+			.filter(c => (
+				Object.keys(c.props).includes('subscribeTo')
+			))[0].props.subscribeTo
+		)[1];
 	} catch (e) {
 		return null;
 	}
 }
 
 function getCurrentSelectedChannel() {
-	return Constants.CURRENT_SELECTED_CHANNEL_REGEX.exec(window.location.pathname)[1];
+	return CURRENT_SELECTED_CHANNEL_REGEX.exec(window.location.pathname)[1];
 }
 
 function addCurrentMessageReaction(emoji) {
@@ -139,8 +158,10 @@ function addCurrentMessageReaction(emoji) {
 }
 
 function addMessageReaction(channel, message, emoji) {
-	$.ajax(`${Constants.API_BASE}/channels/${channel}/messages/${message}/reactions/:${emoji.name}:${emoji.id}/@me`, {
-		method: 'PUT'
+	return fetchURL({
+		url: `${API_BASE}/channels/${channel}/messages/${message}/reactions/:${emoji.name}:${emoji.id}/@me`,
+		method: 'PUT',
+		dataType: 'json',
 	});
 }
 
@@ -157,7 +178,7 @@ function showCustomScroller() {
 
 function replaceScroller() {
 	SCROLLER_WRAP = buildScrollerWrap();
-	SCROLLER_WRAP_OLD = $(Constants.EMOJI_PICKER_PATH).find('.scroller-wrap');
+	SCROLLER_WRAP_OLD = $(EMOJI_PICKER_PATH).find('.scroller-wrap');
 	SCROLLER_WRAP_OLD.hide().before(SCROLLER_WRAP);
 }
 
@@ -165,26 +186,32 @@ function replaceSearchInput() {
 	// SEARCH_INPUT = buildSearchInput();
 	// $(EMOJI_PICKER_PATH).find("input").hide().before(SEARCH_INPUT);
 	// Temporary disabled, as original search have much better performance
-	let picker = $(Constants.EMOJI_PICKER_PATH);
-	SEARCH_INPUT = $(Constants.EMOJI_PICKER_PATH).find('input');
+	let $picker = $(EMOJI_PICKER_PATH);
+	SEARCH_INPUT = $picker.find('input');
+
 	SEARCH_INPUT.on('change keydown keyup paste', () => {
-		let r = picker.find('.scroller-wrap, .no-search-results');
+		let $wrap = $picker.find('.scroller-wrap, .no-search-results');
+
 		if (SEARCH_INPUT.val()) {
-			r.filter('.tl-emoji-scroller-wrap').hide();
-			r.not('.tl-emoji-scroller-wrap').show();
+			$wrap.filter('.tl-emoji-scroller-wrap').hide();
+			$wrap.not('.tl-emoji-scroller-wrap').show();
 		} else {
-			r.filter('.tl-emoji-scroller-wrap').show();
-			r.not('.tl-emoji-scroller-wrap').hide();
+			$wrap.filter('.tl-emoji-scroller-wrap').show();
+			$wrap.not('.tl-emoji-scroller-wrap').hide();
 		}
 	});
 }
 
 function addCustomScrollerParts() {
 	// console.log("picker opened");
-	setTimeout(replaceScroller, 20);
-	setTimeout(replaceSearchInput, 20);
+
 	setTimeout(() => {
-		const categories = $(Constants.EMOJI_PICKER_PATH).find('.categories');
+		setTimeout(showCustomScroller, 10);
+
+		replaceScroller();
+		replaceSearchInput();
+
+		const categories = $(EMOJI_PICKER_PATH).find('.categories');
 		const categoriesChildren = categories.children();
 		const customScroller = ['recent', 'custom'];
 
@@ -202,8 +229,8 @@ function addCustomScrollerParts() {
 
 			showOriginalScroller.call(this, event);
 		});
+
 	}, 20);
-	setTimeout(showCustomScroller, 30);
 }
 
 module.exports.buildServerSpan = buildServerSpan;

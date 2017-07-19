@@ -7,24 +7,23 @@ const removeListeners = Symbol('removeListeners');
 class ChildAddRemoveObserver {
 	constructor(target = null, addListener = null, removeListener = null) {
 		this[observer] = new MutationObserver(([mutation]) => {
-			if (mutation.type === 'childList') {
-				if (mutation.addedNodes.length > 0) {
-					for (const listener of this[addListeners]) {
-						if (typeof listener === 'function') {
-							listener(mutation);
-						}
-					}
-				}
+			if (mutation.type !== 'childList') {
+				return;
+			}
 
-				if (mutation.removedNodes.length > 0) {
-					for (const listener of this[removeListeners]) {
-						if (typeof listener === 'function') {
-							listener(mutation);
-						}
-					}
+			if (mutation.addedNodes.length > 0) {
+				for (const listener of this[addListeners]) {
+					listener(mutation);
+				}
+			}
+
+			if (mutation.removedNodes.length > 0) {
+				for (const listener of this[removeListeners]) {
+					listener(mutation);
 				}
 			}
 		});
+
 		this[addListeners] = [];
 		this[removeListeners] = [];
 
@@ -57,14 +56,18 @@ class ChildAddRemoveObserver {
 
 	on(evt, listener) {
 		if (typeof listener === 'function') {
-			switch (evt) {
-				case 'add':
-					this[addListeners].push(listener);
-					break;
-				case 'remove':
-					this[removeListeners].push(listener);
-					break;
-			}
+			throw new TypeError('Listener must be function');
+		}
+
+		switch (evt) {
+			case 'add':
+				this[addListeners].push(listener);
+
+				break;
+			case 'remove':
+				this[removeListeners].push(listener);
+
+				break;
 		}
 
 		return this;
@@ -73,17 +76,21 @@ class ChildAddRemoveObserver {
 	off(evt) {
 		switch (evt) {
 			case 'add':
-				this[addListeners].length = 0;
+				this[addListeners] = [];
+
 				break;
 			case 'remove':
-				this[removeListeners].length = 0;
+				this[removeListeners] = [];
+
 				break;
 		}
+
 		return this;
 	}
 
 	disconnect() {
 		this[observer].disconnect();
+
 		return this;
 	}
 }
