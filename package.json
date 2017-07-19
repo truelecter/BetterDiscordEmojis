@@ -9,7 +9,7 @@
     "build": "npm-run-all -s mkdir bundle uglify",
     "mkdir": "mkdirp deploy/map",
     "bundle": "browserify src/main.js --debug | exorcist deploy/map/better-emojis.js.map > deploy/better-emojis.js",
-    "uglify": "uglifyjs deploy/better-emojis.js --in-source-map deploy/map/better-emojis.js.map --source-map deploy/map/better-emojis.min.js.map -o deploy/better-emojis.min.js",
+    "uglify": "uglifyjs deploy/better-emojis.js --in-source-map deploy/map/better-emojis.js.map --source-map filename=deploy/map/better-emojis.min.js.map -o deploy/better-emojis.min.js",
     "deploy": "npm-run-all -s build push",
     "push": "git show --format=format:\"Deploy for commit %H\" -s > deploy/commit-message && cd deploy && git add * && git commit -F commit-message && git push"
   },
@@ -28,7 +28,7 @@
     "exorcist": "^0.4.0",
     "mkdirp": "^0.5.1",
     "npm-run-all": "^4.0.2",
-    "uglify-js-es6": "^2.8.9"
+    "uglify-js": "git://github.com/mishoo/UglifyJS2.git#harmony"
   },
   "devDependencies": {
     "watchify": "^3.9.0"
