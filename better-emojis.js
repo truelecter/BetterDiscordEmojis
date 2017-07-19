@@ -211,7 +211,7 @@ function doGetEmojis () {
 
 module.exports = doGetEmojis
 
-},{"./constants.js":1,"./emoji.js":2,"./picker.js":6,"./server.js":7}],4:[function(require,module,exports){
+},{"./constants.js":1,"./emoji.js":2,"./picker.js":7,"./server.js":8}],4:[function(require,module,exports){
 /*! Clusterize.js - v0.17.6 - 2017-03-05
 * http://NeXTs.github.com/Clusterize.js/
 * Copyright (c) 2015 Denis Lukov; Licensed GPLv3 */
@@ -539,42 +539,129 @@ module.exports = doGetEmojis
 },{}],5:[function(require,module,exports){
 const Constants = require('./constants.js')
 const Picker = require('./picker.js')
+const Observer = require('./observer.js').ChildAddRemoveObserver
 
 const initEmojis = require('./initializer.js')
 
-function watchForEmojiPickerChange (listener) {
-  const observer = new MutationObserver(mutations => {
-    if (typeof listener === 'function') {
-      listener(mutations)
-    }
-  })
-  observer.observe($(Constants.EMOJI_PICKER_PATH)[0], { childList: true })
-  return observer
+function attachPickerObserver () {
+  if (window.better_emojis.pickerObserver) {
+    window.better_emojis.pickerObserver.disconnect()
+  } else {
+    window.better_emojis.pickerObserver = new Observer(null,
+      () => {
+        if ($(Constants.EMOJI_PICKER_PATH).find('.emoji-picker').length &&
+                      ($('.channel-textarea-emoji').hasClass('popout-open') || $('.btn-reaction.popout-open').length)) {
+          Picker.show()
+        }
+      },
+      () => {
+        if (window.better_emojis.current_cluster) {
+          window.better_emojis.current_cluster.destroy()
+        }
+      }
+    )
+  }
+  window.better_emojis.pickerObserver.reattach = attachPickerObserver
+  window.better_emojis.pickerObserver.observe($(Constants.EMOJI_PICKER_PATH)[0])
 }
 
 initEmojis().then((spanCache) => {
   Picker.setCommonEmojiSpanCache(spanCache.spanCache)
-  console.log('Better Emojis initialized')
   setTimeout(() => {
-    window.better_emojis.observer = watchForEmojiPickerChange(([mutation]) => {
+    attachPickerObserver()
+    console.log('Better Emojis initialized')
+  }, 2000)
+})
+
+},{"./constants.js":1,"./initializer.js":3,"./observer.js":6,"./picker.js":7}],6:[function(require,module,exports){
+const observer = Symbol('observer')
+const addListeners = Symbol('addListeners')
+const removeListeners = Symbol('removeListeners')
+
+class ChildAddRemoveObserver {
+  constructor (target = null, addListener = null, removeListener = null) {
+    this[observer] = new MutationObserver(([mutation]) => {
       if (mutation.type === 'childList') {
         if (mutation.addedNodes.length > 0) {
-          if ($(Constants.EMOJI_PICKER_PATH).find('.emoji-picker').length &&
-                    ($('.channel-textarea-emoji').hasClass('popout-open') || $('.btn-reaction.popout-open').length)) {
-            Picker.show()
+          for (const listener of this[addListeners]) {
+            if (typeof listener === 'function') {
+              listener(mutation)
+            }
           }
         }
-        if (mutation.removedNodes.length) {
-          if (window.better_emojis.current_cluster) {
-            window.better_emojis.current_cluster.destroy()
+
+        if (mutation.removedNodes.length > 0) {
+          for (const listener of this[removeListeners]) {
+            if (typeof listener === 'function') {
+              listener(mutation)
+            }
           }
         }
       }
     })
-  }, 2000)
-})
+    this[addListeners] = []
+    this[removeListeners] = []
 
-},{"./constants.js":1,"./initializer.js":3,"./picker.js":6}],6:[function(require,module,exports){
+    if (target) {
+      this.observe(target)
+    }
+
+    this.add(addListener).remove(removeListener)
+  }
+
+  observe (target) {
+    if (!target || !(target instanceof Node)) {
+      throw new TypeError('Target must be Node!')
+    }
+
+    this[observer].observe(target, { childList: true })
+
+    return this
+  }
+
+  add (listener) {
+    return this.on('add', listener)
+  }
+
+  remove (listener) {
+    return this.on('remove', listener)
+  }
+
+  on (evt, listener) {
+    if (typeof listener === 'function') {
+      switch (evt) {
+        case 'add':
+          this[addListeners].push(listener)
+          break
+        case 'remove':
+          this[removeListeners].push(listener)
+          break
+      }
+    }
+    return this
+  }
+
+  off (evt) {
+    switch (evt) {
+      case 'add':
+        this[addListeners].length = 0
+        break
+      case 'remove':
+        this[removeListeners].length = 0
+        break
+    }
+    return this
+  }
+
+  disconnect () {
+    this[observer].disconnect()
+    return this
+  }
+}
+
+module.exports.ChildAddRemoveObserver = ChildAddRemoveObserver
+
+},{}],7:[function(require,module,exports){
 const Constants = require('./constants.js')
 const Clusterize = require('./lib/clusterize.js')
 const Emoji = require('./emoji.js')
@@ -777,7 +864,7 @@ module.exports.setCommonEmojiSpanCache = function (cache) {
   commonEmojisSpansCache = cache
 }
 
-},{"./constants.js":1,"./emoji.js":2,"./lib/clusterize.js":4,"./server.js":7}],7:[function(require,module,exports){
+},{"./constants.js":1,"./emoji.js":2,"./lib/clusterize.js":4,"./server.js":8}],8:[function(require,module,exports){
 const Emoji = require('./emoji.js')
 
 const GLOBAL_SERVER_LIST = []
