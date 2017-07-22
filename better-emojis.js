@@ -5,6 +5,7 @@ exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
 exports.EMOJI_PICKER_PATH = '#app-mount > div > div:nth-child(7)';
+exports.EMOJI_BUTTON_CLASS = n(2116).emojiButton;
 exports.LOCAL_STORAGE_MODULE = n(1595);
 exports.EMOJI_STORAGE_MODULE = n(169).default;
 exports.TRANSLATION_MODULE = n(3);
@@ -634,7 +635,10 @@ module.exports = doGetEmojis;
 
 const Picker = require('./picker.js');
 const Observer = require('./observer.js').ChildAddRemoveObserver;
-const { EMOJI_PICKER_PATH } = require('./constants.js');
+const {
+	EMOJI_PICKER_PATH,
+	EMOJI_BUTTON_CLASS,
+} = require('./constants.js');
 
 const initEmojis = require('./initializer.js');
 
@@ -646,7 +650,7 @@ function attachPickerObserver() {
 			() => {
 				let isPickerOpened = !!$(EMOJI_PICKER_PATH).find('.emoji-picker').length;
 				let isInlineOrTextareaPicker =
-					$('.channel-textarea-emoji').hasClass('popout-open') ||
+					$(`.${EMOJI_BUTTON_CLASS}`).hasClass('popout-open') ||
 					!!$('.btn-reaction.popout-open').length;
 				if (isPickerOpened && isInlineOrTextareaPicker) {
 					Picker.show();
