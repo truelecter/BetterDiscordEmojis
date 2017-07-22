@@ -4,8 +4,8 @@ exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
 exports.EMOJI_PICKER_PATH = '#app-mount > div > div:nth-child(7)';
-exports.LOCAL_STORAGE_MODULE = n(1590);
-exports.EMOJI_STORAGE_MODULE = n(168).default;
+exports.LOCAL_STORAGE_MODULE = n(1595);
+exports.EMOJI_STORAGE_MODULE = n(169).default;
 exports.TRANSLATION_MODULE = n(3);
 exports.TOKEN_KEY = n(0).TOKEN_KEY;
 /* May be changed with discord updates.END */
