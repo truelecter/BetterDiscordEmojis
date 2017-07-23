@@ -14,7 +14,9 @@ const {
 	ELEMENT_SERVER_EMOJI_LIST,
 	ELEMENT_SERVER_EMOJI_LIST_ROW,
 	CURRENT_SELECTED_CHANNEL_REGEX,
-	ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY
+	ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY,
+	EMOJI_BUTTON_CLASS,
+	CHANNEL_TEXTAREA_CLASS
 } = require('./constants.js');
 
 let commonEmojisSpansCache = '';
@@ -57,7 +59,7 @@ function buildScrollerWrap() {
 		contentElem: $scr[0]
 	});
 
-	const emojiClickHandler = $('.channel-textarea-emoji').hasClass('popout-open')
+	const emojiClickHandler = $(`.${EMOJI_BUTTON_CLASS}`).hasClass('popout-open')
 		? putEmojiInTextarea
 		: addCurrentMessageReaction;
 
@@ -120,7 +122,7 @@ function buildEmojisRows(eL) {
 }
 
 function putEmojiInTextarea(emoji) {
-	const $textarea = $('.channel-textarea >> textarea');
+	const $textarea = $(`.${CHANNEL_TEXTAREA_CLASS} >> textarea`);
 
 	$textarea.val($textarea.val() + emoji.useName + ' ');
 }
