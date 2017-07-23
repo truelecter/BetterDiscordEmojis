@@ -5,7 +5,7 @@
   "description": "Modified emoji picker for Discord",
   "main": "index.js",
   "scripts": {
-    "watch": "watchify src/main.js -o deploy/better-emojis.js --debug",
+    "watch": "watchify src/main.js -o deploy/better-emojis.js --debug -v",
     "build": "npm-run-all -s mkdir bundle uglify",
     "mkdir": "mkdirp deploy/map",
     "bundle": "browserify src/main.js --debug | exorcist deploy/map/better-emojis.js.map > deploy/better-emojis.js",
