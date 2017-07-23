@@ -6,6 +6,7 @@ exports.API_BASE = 'https://discordapp.com/api';
 /* May be changed with discord updates */
 exports.EMOJI_PICKER_PATH = '#app-mount > div > div:nth-child(7)';
 exports.EMOJI_BUTTON_CLASS = n(2116).emojiButton;
+exports.CHANNEL_TEXTAREA_CLASS = n(2116).channelTextArea;
 exports.LOCAL_STORAGE_MODULE = n(1595);
 exports.EMOJI_STORAGE_MODULE = n(169).default;
 exports.TRANSLATION_MODULE = n(3);
@@ -794,7 +795,9 @@ const {
 	ELEMENT_SERVER_EMOJI_LIST,
 	ELEMENT_SERVER_EMOJI_LIST_ROW,
 	CURRENT_SELECTED_CHANNEL_REGEX,
-	ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY
+	ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY,
+	EMOJI_BUTTON_CLASS,
+	CHANNEL_TEXTAREA_CLASS
 } = require('./constants.js');
 
 let commonEmojisSpansCache = '';
@@ -837,7 +840,7 @@ function buildScrollerWrap() {
 		contentElem: $scr[0]
 	});
 
-	const emojiClickHandler = $('.channel-textarea-emoji').hasClass('popout-open')
+	const emojiClickHandler = $(`.${EMOJI_BUTTON_CLASS}`).hasClass('popout-open')
 		? putEmojiInTextarea
 		: addCurrentMessageReaction;
 
@@ -900,7 +903,7 @@ function buildEmojisRows(eL) {
 }
 
 function putEmojiInTextarea(emoji) {
-	const $textarea = $('.channel-textarea >> textarea');
+	const $textarea = $(`.${CHANNEL_TEXTAREA_CLASS} >> textarea`);
 
 	$textarea.val($textarea.val() + emoji.useName + ' ');
 }
