@@ -10,6 +10,7 @@ exports.LOCAL_STORAGE_MODULE = n(1595);
 exports.EMOJI_STORAGE_MODULE = n(169).default;
 exports.TRANSLATION_MODULE = n(3);
 exports.TOKEN_KEY = n(0).TOKEN_KEY;
+exports.SETTINGS_CLASSES = n(2141);
 /* May be changed with discord updates.END */
 
 exports.ELEMENT_SCROLLER_WRAP = '<div class="scroller-wrap tl-emoji-scroller-wrap"><div class="scroller"></div></div>';
@@ -25,6 +26,8 @@ exports.CURRENT_SELECTED_CHANNEL_REGEX = /.*\/.+\/(\d+)/;
 exports.IS_INBOX_REGEX = /\/channels\/@me\/\d+/;
 
 exports.IS_NUMBER_REGEX = /\d+/;
+
+exports.BETTER_EMOJIS_KEY = 'better-emojis';
 
 /**
  * Default options HTTP Fetch jQuery
