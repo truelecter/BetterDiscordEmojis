@@ -3,7 +3,7 @@
 const {
 	LOCAL_STORAGE_MODULE,
 	BETTER_EMOJIS_KEY,
-} = require('./constants.js')
+} = require('./constants.js');
 
 const fs = require('fs');
 const path = require('path');
@@ -17,7 +17,7 @@ const loadedSettings = loadSettings();
 
 const settings = Object.assign(defaultSettings, loadedSettings);
 
-function loadSettings(){
+function loadSettings() {
 	try {
 		return JSON.parse(fs.readFileSync(path.resolve(fileLocation, 'config.json'), 'utf-8'));
 	} catch (err) {
@@ -34,11 +34,11 @@ function saveSettings() {
 	}
 }
 
-exports.set = function (key, value){
+exports.set = function (key, value) {
 	settings[key] = value;
 	saveSettings();
-}
+};
 
-exports.get = function (key){
+exports.get = function (key) {
 	return settings[key] || null;
-}
+};
