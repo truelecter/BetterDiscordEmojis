@@ -9,10 +9,10 @@ const {
 const fs = require('fs');
 const path = require('path');
 
-const defaultSettings = {};
+const defaultSettings = {enabled: true};
 
-const fileLocation = typeof window.betterEmojiLocation == 'undefined' ? null :
-	path.resolve(window.betterEmojiLocation, 'config.json');
+const fileLocation = typeof window.betterEmojiLocation !== 'undefined' && fs.readFileSync && fs.writeFileSync ? 
+	path.resolve(window.betterEmojiLocation, 'config.json') : null;
 
 const loadedSettings = loadSettings();
 
