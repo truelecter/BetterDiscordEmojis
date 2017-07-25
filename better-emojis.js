@@ -5,8 +5,8 @@ exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
 exports.EMOJI_PICKER_PATH = '#app-mount > div > div:nth-child(7)';
-exports.EMOJI_BUTTON_CLASS = n(2116).emojiButton;
-exports.CHANNEL_TEXTAREA_CLASS = n(2116).channelTextArea;
+exports.EMOJI_BUTTON_CLASS = n(2117).emojiButton;
+exports.CHANNEL_TEXTAREA_CLASS = n(2117).channelTextArea;
 exports.LOCAL_STORAGE_MODULE = n(1595);
 exports.EMOJI_STORAGE_MODULE = n(169).default;
 exports.TRANSLATION_MODULE = n(3);
@@ -26,6 +26,8 @@ exports.CURRENT_SELECTED_CHANNEL_REGEX = /.*\/.+\/(\d+)/;
 exports.IS_INBOX_REGEX = /\/channels\/@me\/\d+/;
 
 exports.IS_NUMBER_REGEX = /\d+/;
+
+exports.BETTER_EMOJIS_KEY = 'better-emojis';
 
 /**
  * Default options HTTP Fetch jQuery
