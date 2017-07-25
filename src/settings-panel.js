@@ -22,7 +22,7 @@ function buildSidebarEntry() {
 
 	const $button = $('<div/>').addClass(SETTINGS_CLASSES.itemDefault).addClass(SIDEBAR_BUTTON_CLASS).html('Better Emojis');
 
-	$button.click(function () {
+	$button.mousedown(function () {
 		const $this = $(this);
 
 		// Make all selected items unselected
@@ -84,15 +84,15 @@ function injectPanel(layer) {
 
 	$layer.find('.sidebar > div')
 		.children()
-		.click(() => {
+		.mousedown(() => {
 			$contentRegion.find('.content-column').show();
 			$contentColumn.hide();
-			$button.removeClass(SETTINGS_CLASSES.itemDefault).addClass(SETTINGS_CLASSES.itemDefaultSelected);
+			$button.removeClass(SETTINGS_CLASSES.itemDefault);
 		})
 		.filter((index, element) => { return $(element).text() === TRANSLATION_MODULE.Messages.CHANGE_LOG; }).before($entry);
 
 	
-	$button.click(() => {
+	$button.mousedown(() => {
 		$contentRegion.find('.content-column').hide();
 		$contentColumn.show();
 	})
