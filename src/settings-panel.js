@@ -79,7 +79,7 @@ function injectPanel(layer) {
 	const { $entry, $button } = buildSidebarEntry();
 	const $contentColumn = buildContentColumn().hide();
 	const $contentRegion = $layer.find('.content-region-scroller');
-	
+
 	$contentRegion.prepend($contentColumn);
 
 	$layer.find('.sidebar > div')
@@ -89,25 +89,25 @@ function injectPanel(layer) {
 			$contentColumn.hide();
 			$button.removeClass(SETTINGS_CLASSES.itemDefault);
 		})
-		.filter((index, element) => { return $(element).text() === TRANSLATION_MODULE.Messages.CHANGE_LOG; }).before($entry);
+		.filter((index, element) => $(element).text() === TRANSLATION_MODULE.Messages.CHANGE_LOG).before($entry);
 
-	
 	$button.mousedown(() => {
 		$contentRegion.find('.content-column').hide();
 		$contentColumn.show();
-	})
+	});
 }
 
 function getClasses(from, what) {
-	if (!(what instanceof Array)) 
+	if (!(what instanceof Array))
 		return from[what];
-	
+
 	const res = [];
 
 	for (const key of what) {
 		if (typeof what === 'undefined') {
-			console.warn(from, `doesn't have property ${what}. Check module numbers`)
+			console.warn(from, `doesn't have property ${what}. Check module numbers`);
 		}
+
 		res.push(from[key]);
 	}
 
@@ -131,9 +131,9 @@ function checkbox({ setting, name, description, value, change }) {
 			</div>
 			<div class="${DIVIDER_ITEM_CLASSES.divider} ${SWITCH_ITEM_CLASSES.divider}"></div>
 		</div>
-		`).on('click', function() {
+		`).on('click', function () {
 			const $this = $(this).find(`.${SWITCH_CLASSES.switch}`);
-			
+
 			$this.toggleClass(SWITCH_CLASSES.checked);
 
 			if (typeof change === 'function') {

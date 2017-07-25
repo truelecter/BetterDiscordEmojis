@@ -17,9 +17,10 @@ function attachPickerObserver() {
 	} else {
 		window.better_emojis.pickerObserver = new Observer(null,
 			() => {
-				if (!Settings.get('enabled')){
+				if (!Settings.get('enabled')) {
 					return;
 				}
+
 				let isPickerOpened = !!$(EMOJI_PICKER_PATH).find('.emoji-picker').length;
 				let isInlineOrTextareaPicker =
 					$(`.${EMOJI_BUTTON_CLASS}`).hasClass('popout-open') ||
@@ -48,7 +49,7 @@ function attachSettingsObserver() {
 		window.better_emojis.settingsObserver = new Observer(null,
 			(mutation) => {
 				setTimeout(() => {
-					SettingsPanel.inject(mutation.addedNodes[0])
+					SettingsPanel.inject(mutation.addedNodes[0]);
 				}, 30);
 			}
 		);
