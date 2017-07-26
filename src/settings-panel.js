@@ -87,7 +87,7 @@ function injectPanel(layer) {
 		.mousedown(() => {
 			$contentRegion.find('.content-column').show();
 			$contentColumn.hide();
-			$button.removeClass(SETTINGS_CLASSES.itemDefault);
+			$button.removeClass(SETTINGS_CLASSES.itemDefaultSelected).addClass(SETTINGS_CLASSES.itemDefault);
 		})
 		.filter((index, element) => $(element).text() === TRANSLATION_MODULE.Messages.CHANGE_LOG).before($entry);
 
