@@ -5,10 +5,10 @@ exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
 exports.EMOJI_PICKER_PATH = '#app-mount > div > div:nth-child(7)';
-exports.EMOJI_BUTTON_CLASS = n(2117).emojiButton;
+exports.EMOJI_BUTTON_CLASS = n(2367).emojiButton;
 exports.CHANNEL_TEXTAREA_CLASS = n(2117).channelTextArea;
-exports.LOCAL_STORAGE_MODULE = n(1595);
-exports.EMOJI_STORAGE_MODULE = n(169).default;
+exports.LOCAL_STORAGE_MODULE = n(1786);
+exports.EMOJI_STORAGE_MODULE = n(174).default;
 exports.TRANSLATION_MODULE = n(3);
 exports.TOKEN_KEY = n(0).TOKEN_KEY;
 /* May be changed with discord updates.END */
