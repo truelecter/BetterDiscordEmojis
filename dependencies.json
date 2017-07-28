@@ -6,5 +6,9 @@
 	{
 		"type": "script",
 		"url": "https://raw.githubusercontent.com/TrueLecter/BetterDiscordEmojis/dist/better-emojis.min.js"	
+	},
+	{
+		"type": "css",
+		"url": "https://raw.githubusercontent.com/TrueLecter/BetterDiscordEmojis/dist/better-emojis.css"		
 	}
 ]
