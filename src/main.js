@@ -64,6 +64,7 @@ initEmojis().then((spanCache) => {
 	setTimeout(() => {
 		attachPickerObserver();
 		attachSettingsObserver();
+		SettingsPanel.updateHiddenServers();
 		console.log('Better Emojis initialized');
 	}, 2000);
 });

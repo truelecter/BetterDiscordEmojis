@@ -3,6 +3,7 @@
 const Clusterize = require('./lib/clusterize.js');
 const Emoji = require('./emoji.js');
 const Server = require('./server.js');
+const Settings = require('./settings.js');
 
 const { fetchURL } = require('./helpers');
 const {
@@ -41,7 +42,9 @@ function buildScrollerWrap() {
 	// Append all other server shared emojis
 	if (currentServer.canUseExternalEmojis) {
 		for (const server of Server.getAllServers()) {
-			if (!server.isCurrent() && server.sharedEmojis.length > 0 && IS_NUMBER_REGEX.test(server.id)) {
+			if (!server.isCurrent() && server.isShownInPicker()
+				&& server.sharedEmojis.length > 0 && IS_NUMBER_REGEX.test(server.id)
+			) {
 				$scr.append(buildServerSpan(server));
 			}
 		}

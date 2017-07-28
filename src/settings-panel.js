@@ -11,11 +11,14 @@ const {
 	DIVIDER_ITEM_CLASSES,
 	LABEL_ITEM_CLASSES,
 	FONT_SIZE_CLASSES,
+	CARD_CLASSES,
+	SERVER_CARD_CLASSES,
 } = require('./classes.js');
 
 const { TRANSLATION_MODULE } = require('./constants.js');
 
 const Settings = require('./settings.js');
+const Server = require('./server.js');
 
 function buildSidebarEntry() {
 	const $entry = $('<span/>');
@@ -70,7 +73,34 @@ function buildContentColumn() {
 		}
 	}));
 
+	const guildsIcons = getServersIcons();
+	const servers = Server.getAllServers();
+
+	for (const server of servers) {
+		if (server.isGuild())
+			$contentDiv.append(serverCard(server, guildsIcons));
+	}
+
 	return $column;
+}
+
+const SERVER_REGEX = /\/channels\/(\d+)\/\d+/;
+const BACKGOUND_URL_REGEX = /background-image: url\("(.*)"\);/;
+
+function getServersIcons() {
+	const guildsIcons = {};
+
+	$('.guild').map((i, guild) => {
+		const $avatar = $(guild).find('.avatar-small');
+		const match = SERVER_REGEX.exec($avatar.attr('href'));
+		if (!match) {
+			return guild;
+		}
+		guildsIcons[`${match[1]}`] = BACKGOUND_URL_REGEX.exec($avatar.attr('style'))[1];
+		return guild;
+	});
+
+	return guildsIcons;
 }
 
 function injectPanel(layer) {
@@ -141,5 +171,90 @@ function checkbox({ setting, name, description, value, change }) {
 			}
 		});
 }
+
+function serverCard(server, iconStorage) {
+	const $card = $(`
+		<div class="${CARD_CLASSES.cardPrimary} ${SERVER_CARD_CLASSES.serverCard}" id="server-card-${server.id}" style="padding: 7px">
+			<div class="${getClasses(FLEX_CLASSES, ['horizontal', 'flex', 'justifyStart', 'alignStretch', 'noWrap'])}">
+				<div class="${FLEX_CHILD_CLASSES.flexChild}" style="padding-right: 15px;">
+					<img class="${SERVER_CARD_CLASSES.icon}" src="${iconStorage[server.id]}"/>
+				</div>
+				<div class="${FLEX_CHILD_CLASSES.flexChild} ${FLEX_CLASSES.vertical}" style="width: 60%">
+					<h5 class="${FLEX_CHILD_CLASSES.flexChild} ${HEADER_CLASSES.h5} margin-bottom-4">${server.name}</h5>
+					<h5 class="${FLEX_CHILD_CLASSES.flexChild} ${HEADER_CLASSES.h5} margin-bottom-4">Emojis: ${server.emojis.length}, BBTV: ${server.sharedEmojis.length}</h5>	
+				</div>
+				<div class="${FLEX_CHILD_CLASSES.flexChild} ${FLEX_CLASSES.vertical}" style="flex: 1 1 auto;">
+					<div class="margin-bottom-4 ${[SERVER_CARD_CLASSES.showInPicker, getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
+						<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.title, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
+							Picker
+						</h3>
+						<div class="${SWITCH_CLASSES.switchWrapperDefaultActive} ${FLEX_CHILD_CLASSES.flexChild}" style="flex: 0 0 auto;">
+							<input type="checkbox" class="${SWITCH_CLASSES.checkbox}" value="on">
+							<div class="${SWITCH_CLASSES.switch} ${server.isShownInPicker() ? SWITCH_CLASSES.checked : ''} ${SERVER_CARD_CLASSES.showInPickerSwitch}"></div>
+						</div>
+					</div>
+					<div class="margin-bottom-4 ${[SERVER_CARD_CLASSES.showInServerList, getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
+						<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.title, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
+							Server list
+						</h3>
+						<div class="${SWITCH_CLASSES.switchWrapperDefaultActive} ${FLEX_CHILD_CLASSES.flexChild}" style="flex: 0 0 auto;">
+							<input type="checkbox" class="${SWITCH_CLASSES.checkbox}" value="on">
+							<div class="${SWITCH_CLASSES.switch} ${server.isShownInList() ? SWITCH_CLASSES.checked : ''} ${SERVER_CARD_CLASSES.showInServerListSwitch}"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	`);
+
+	$card.find(`.${SERVER_CARD_CLASSES.showInServerList}`).click(function () {
+		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInServerListSwitch}`);
+
+		$switch.toggleClass(SWITCH_CLASSES.checked);
+
+		const isShown = $switch.hasClass(SWITCH_CLASSES.checked);
+
+		Settings.set(`serverlist.show.${server.id}`, isShown);
+
+		updateHiddenServers();
+	});
+
+	$card.find(`.${SERVER_CARD_CLASSES.showInPicker}`).click(function () {
+		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInPickerSwitch}`);
+
+		$switch.toggleClass(SWITCH_CLASSES.checked);
+
+		Settings.set(`picker.server.show.${server.id}`, $switch.hasClass(SWITCH_CLASSES.checked));
+	});
+
+	return $card;
+}
+
+function updateHiddenServers() {
+	$('.guild').map((i, guild) => {
+		const $avatar = $(guild).find('.avatar-small');
+		const match = SERVER_REGEX.exec($avatar.attr('href'));
+
+		if (!match) {
+			return guild;
+		}
+
+		const server = Server.getById(match[1]);
+
+		if (server.isShownInList()){
+			$(guild).show();
+		} else {
+			$(guild).hide();
+		}
+
+		console.log(`${server.name} (${server.id}) ${server.isShownInPicker() ? 'is' : 'isn\'t'} shown`);
+
+		return guild;
+	});
+}
+
+exports.updateHiddenServers = updateHiddenServers;
+
+window.updateHiddenServers = updateHiddenServers;
 
 exports.inject = injectPanel;

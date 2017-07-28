@@ -9,8 +9,17 @@ exports.SWITCH_ITEM_CLASSES = n(2391);
 exports.DIVIDER_ITEM_CLASSES = n(2397);
 exports.LABEL_ITEM_CLASSES = n(2400);
 exports.FONT_SIZE_CLASSES = n(2393);
+exports.CARD_CLASSES = n(2366);
 
 exports.SIDEBAR_BUTTON_CLASS = 'be-settings-button';
+exports.SERVER_CARD_CLASSES = {
+	showInPicker: 'be-server-show-in-picker',
+	showInPickerSwitch: 'be-server-show-in-picker-switch',
+	showInServerList: 'be-server-show-in-server-list',
+	showInServerListSwitch: 'be-server-show-in-server-list-switch',
+	serverCard: 'be-server-card',
+	icon: 'be-server-icon',
+};
 
 function n(id) {
 	return webpackJsonp([], [], [id]);
