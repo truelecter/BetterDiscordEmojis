@@ -69,6 +69,10 @@ class Server {
 		return this[sharedEmojis];
 	}
 
+	isGuild() {
+		return /\d+/.test(this[id]);
+	}
+
 	isCurrent() {
 		return this[serverRegex].test(window.location);
 	}
