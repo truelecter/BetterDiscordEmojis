@@ -40,6 +40,14 @@ exports.set = function (key, value) {
 	saveSettings();
 };
 
-exports.get = function (key) {
-	return settings[key] || null;
+function valueOrDefault(value, def) {
+	if (value === null || typeof value === 'undefined') {
+		return def;
+	}
+
+	return value;
+}
+
+exports.get = function (key, def) {
+	return valueOrDefault(settings[key], def);
 };
