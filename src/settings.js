@@ -11,7 +11,9 @@ const path = require('path');
 
 const defaultSettings = { enabled: true };
 
-const fileLocation = typeof window.betterEmojiLocation !== 'undefined' && fs.readFileSync && fs.writeFileSync ?
+const fileLocation =
+	typeof window.betterEmojiLocation !== 'undefined' &&
+	fs.readFileSync && fs.writeFileSync && path.resolve ?
 	path.resolve(window.betterEmojiLocation, 'config.json') : null;
 
 const loadedSettings = loadSettings();
