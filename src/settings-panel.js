@@ -241,10 +241,12 @@ function updateHiddenServers() {
 
 		const server = Server.getById(match[1]);
 
-		if (server.isShownInList()){
-			$(guild).show();
+		if (server.isShownInList()) {
+			$(guild).removeAttr('style');
 		} else {
-			$(guild).hide();
+			$(guild).animate({width: 0, height: 0}, 500, 'swing', function(){
+				$(this).hide();
+			});
 		}
 
 		return guild;
