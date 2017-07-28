@@ -48,7 +48,7 @@ function buildContentColumn() {
 	const $column = $(`
 	<div class="content-column default"><div>
 		<div class="better-emojis-settings">
-			<h2 class="h2-2ar_1B title-1pmpPr size16-3IvaX_ height20-165WbF weightSemiBold-T8sxWH defaultColor-v22dK1 defaultMarginh2-37e5HZ marginBottom20-2Ifj-2">
+			<h2 class="${getClasses(HEADER_CLASSES, ['h2', 'defaultColor', 'defaultMarginh2'])}">
 					Better Emojis
 				</h2>
 				<div class="flex-vertical">
@@ -104,8 +104,8 @@ function getClasses(from, what) {
 	const res = [];
 
 	for (const key of what) {
-		if (typeof what === 'undefined') {
-			console.warn(from, `doesn't have property ${what}. Check module numbers`);
+		if (typeof from[key] === 'undefined') {
+			console.warn(from, `doesn't have property ${key}. Check module numbers`);
 		}
 
 		res.push(from[key]);
