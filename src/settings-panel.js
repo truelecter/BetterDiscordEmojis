@@ -247,14 +247,10 @@ function updateHiddenServers() {
 			$(guild).hide();
 		}
 
-		console.log(`${server.name} (${server.id}) ${server.isShownInPicker() ? 'is' : 'isn\'t'} shown`);
-
 		return guild;
 	});
 }
 
 exports.updateHiddenServers = updateHiddenServers;
-
-window.updateHiddenServers = updateHiddenServers;
 
 exports.inject = injectPanel;
