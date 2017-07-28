@@ -1,6 +1,7 @@
 'use strict';
 
 const Emoji = require('./emoji.js');
+const Settings = require('./settings.js');
 
 const GLOBAL_SERVER_LIST = [];
 
@@ -93,6 +94,14 @@ class Server {
 		}
 
 		return list;
+	}
+
+	isShownInList() {
+		return Settings.get(`serverlist.show.${this[id]}`, true);
+	}
+
+	isShownInPicker() {
+		return Settings.get(`picker.server.show.${this[id]}`, true);
 	}
 
 	static getCurrentServer() {
