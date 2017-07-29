@@ -9,7 +9,8 @@ const {
 	TOKEN_KEY,
 	TRANSLATION_MODULE,
 	EMOJI_STORAGE_MODULE,
-	LOCAL_STORAGE_MODULE
+	LOCAL_STORAGE_MODULE,
+	CUSTOM_EMOJI_STORAGE_MODULE,
 } = require('./constants.js');
 
 let MY_ID = '';
@@ -54,26 +55,17 @@ function parseServer({ id: serverId, permissions: serverPermissions }) {
 		// now we got detailed info about server. fill emoji and managed emojis.
 		// also set name
 		const server = new Server(id, name, serverPermissions);
+		const emojiContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(id);
 
-		for (const emoji of emojis.map(Emoji.fromRaw)) {
-			const emojiRoles = emoji.roles;
-
-			if (!emojiRoles.length) {
+		// Eventually, CUSTOM_EMOJI_STORAGE_MODULE filters emojis that we can't use by itself!
+		return emojis
+			.map(e => emojiContext.getById(e.id))
+			.filter(e => !!e)
+			.map(Emoji.fromRaw)
+			.reduce(function (server, emoji) {
 				server.addEmoji(emoji);
-
-				continue;
-			}
-
-			for (const role of emojiRoles) {
-				if (roles.includes(role)) {
-					server.addEmoji(emoji);
-
-					break;
-				}
-			}
-		}
-
-		return server;
+				return server;
+			}, server);
 	});
 }
 

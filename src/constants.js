@@ -10,6 +10,7 @@ exports.CHANNEL_TEXTAREA_CLASS = n(2367).channelTextArea;
 exports.LOCAL_STORAGE_MODULE = n(1786);
 exports.EMOJI_STORAGE_MODULE = n(174).default;
 exports.TRANSLATION_MODULE = n(3);
+exports.CUSTOM_EMOJI_STORAGE_MODULE = n(204);
 exports.TOKEN_KEY = n(0).TOKEN_KEY;
 /* May be changed with discord updates.END */
 
