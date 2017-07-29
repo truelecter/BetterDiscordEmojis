@@ -446,6 +446,7 @@ function n(id) {
 },{}],5:[function(require,module,exports){
 'use strict';
 
+//jscs: disable maximumLineLength
 exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
@@ -455,6 +456,7 @@ exports.CHANNEL_TEXTAREA_CLASS = n(2367).channelTextArea;
 exports.LOCAL_STORAGE_MODULE = n(1786);
 exports.EMOJI_STORAGE_MODULE = n(174).default;
 exports.TRANSLATION_MODULE = n(3);
+exports.CUSTOM_EMOJI_STORAGE_MODULE = n(204);
 exports.TOKEN_KEY = n(0).TOKEN_KEY;
 /* May be changed with discord updates.END */
 
@@ -595,7 +597,8 @@ const {
 	TOKEN_KEY,
 	TRANSLATION_MODULE,
 	EMOJI_STORAGE_MODULE,
-	LOCAL_STORAGE_MODULE
+	LOCAL_STORAGE_MODULE,
+	CUSTOM_EMOJI_STORAGE_MODULE,
 } = require('./constants.js');
 
 let MY_ID = '';
@@ -640,26 +643,17 @@ function parseServer({ id: serverId, permissions: serverPermissions }) {
 		// now we got detailed info about server. fill emoji and managed emojis.
 		// also set name
 		const server = new Server(id, name, serverPermissions);
+		const emojiContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(id);
 
-		for (const emoji of emojis.map(Emoji.fromRaw)) {
-			const emojiRoles = emoji.roles;
-
-			if (!emojiRoles.length) {
+		// Eventually, CUSTOM_EMOJI_STORAGE_MODULE filters emojis that we can't use by itself!
+		return emojis
+			.map(e => emojiContext.getById(e.id))
+			.filter(e => !!e)
+			.map(Emoji.fromRaw)
+			.reduce(function (server, emoji) {
 				server.addEmoji(emoji);
-
-				continue;
-			}
-
-			for (const role of emojiRoles) {
-				if (roles.includes(role)) {
-					server.addEmoji(emoji);
-
-					break;
-				}
-			}
-		}
-
-		return server;
+				return server;
+			}, server);
 	});
 }
 
@@ -1274,7 +1268,8 @@ const {
 	CURRENT_SELECTED_CHANNEL_REGEX,
 	ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY,
 	EMOJI_BUTTON_CLASS,
-	CHANNEL_TEXTAREA_CLASS
+	CHANNEL_TEXTAREA_CLASS,
+	CUSTOM_EMOJI_STORAGE_MODULE,
 } = require('./constants.js');
 
 let commonEmojisSpansCache = '';
@@ -1319,6 +1314,8 @@ function buildScrollerWrap() {
 		contentElem: $scr[0]
 	});
 
+	const serverContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(currentServer.id);
+
 	const emojiClickHandler = $(`.${EMOJI_BUTTON_CLASS}`).hasClass('popout-open')
 		? putEmojiInTextarea
 		: addCurrentMessageReaction;
@@ -1328,7 +1325,7 @@ function buildScrollerWrap() {
 		console.log('Selected emoji - ', Emoji.getById($(e.target).attr('data-emoji')));
 	})
 	.on('click', '.emoji-item', e => {
-		emojiClickHandler(Emoji.getById($(e.target).attr('data-emoji')));
+		emojiClickHandler(serverContext.getById($(e.target).attr('data-emoji')));
 	})
 	.on('mouseenter', '.emoji-item', e => {
 		$(e.target).addClass('selected');
@@ -1384,7 +1381,7 @@ function buildEmojisRows(eL) {
 function putEmojiInTextarea(emoji) {
 	const $textarea = $(`.${CHANNEL_TEXTAREA_CLASS} >> textarea`);
 
-	$textarea.val($textarea.val() + emoji.useName + ' ');
+	$textarea.val($textarea.val() + (emoji.require_colons ? `:${emoji.name}:` : emoji.name));
 }
 
 function findReact(dom) {
@@ -1421,7 +1418,7 @@ function addCurrentMessageReaction(emoji) {
 
 function addMessageReaction(channel, message, emoji) {
 	return fetchURL({
-		url: `${API_BASE}/channels/${channel}/messages/${message}/reactions/:${emoji.name}:${emoji.id}/@me`,
+		url: `${API_BASE}/channels/${channel}/messages/${message}/reactions/:${emoji.name}:${emoji.id}/@me`, //jscs:disable maximumLineLength
 		method: 'PUT',
 		dataType: 'json',
 	});
@@ -1653,7 +1650,10 @@ const Server = require('./server.js');
 function buildSidebarEntry() {
 	const $entry = $('<span/>');
 
-	const $button = $('<div/>').addClass(SETTINGS_CLASSES.itemDefault).addClass(SIDEBAR_BUTTON_CLASS).html('Better Emojis');
+	const $button = $('<div/>')
+		.addClass(SETTINGS_CLASSES.itemDefault)
+		.addClass(SIDEBAR_BUTTON_CLASS)
+		.html('Better Emojis');
 
 	$button.mousedown(function () {
 		const $this = $(this);
@@ -1723,9 +1723,11 @@ function getServersIcons() {
 	$('.guild').map((i, guild) => {
 		const $avatar = $(guild).find('.avatar-small');
 		const match = SERVER_REGEX.exec($avatar.attr('href'));
+
 		if (!match) {
 			return guild;
 		}
+
 		guildsIcons[`${match[1]}`] = BACKGOUND_URL_REGEX.exec($avatar.attr('style'))[1];
 		return guild;
 	});
@@ -1749,7 +1751,8 @@ function injectPanel(layer) {
 			$contentColumn.hide();
 			$button.removeClass(SETTINGS_CLASSES.itemDefaultSelected).addClass(SETTINGS_CLASSES.itemDefault);
 		})
-		.filter((index, element) => $(element).text() === TRANSLATION_MODULE.Messages.CHANGE_LOG).before($entry);
+		.filter((index, element) => $(element).text() === TRANSLATION_MODULE.Messages.CHANGE_LOG)
+		.before($entry);
 
 	$button.mousedown(() => {
 		$contentRegion.find('.content-column').hide();
@@ -1775,6 +1778,7 @@ function getClasses(from, what) {
 }
 
 function checkbox({ setting, name, description, value, change }) {
+	//jscs:disable maximumLineLength
 	return $(`
 		<div class="${[FLEX_CHILD_CLASSES.flex, getClasses(FLEX_CLASSES, ['vertical', 'justifyStart', 'alignStretch', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
 			<div class="${[getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
@@ -1791,7 +1795,10 @@ function checkbox({ setting, name, description, value, change }) {
 			</div>
 			<div class="${DIVIDER_ITEM_CLASSES.divider} ${SWITCH_ITEM_CLASSES.divider}"></div>
 		</div>
-		`).on('click', function () {
+		`)
+
+		//jscs:enable maximumLineLength
+		.on('click', function () {
 			const $this = $(this).find(`.${SWITCH_CLASSES.switch}`);
 
 			$this.toggleClass(SWITCH_CLASSES.checked);
@@ -1803,6 +1810,7 @@ function checkbox({ setting, name, description, value, change }) {
 }
 
 function serverCard(server, iconStorage) {
+	//jscs:disable maximumLineLength
 	const $card = $(`
 		<div class="${CARD_CLASSES.cardPrimary} ${SERVER_CARD_CLASSES.serverCard}" id="server-card-${server.id}" style="padding: 7px">
 			<div class="${getClasses(FLEX_CLASSES, ['horizontal', 'flex', 'justifyStart', 'alignStretch', 'noWrap'])}">
@@ -1837,6 +1845,7 @@ function serverCard(server, iconStorage) {
 		</div>
 	`);
 
+	//jscs:enable maximumLineLength
 	$card.find(`.${SERVER_CARD_CLASSES.showInServerList}`).click(function () {
 		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInServerListSwitch}`);
 
@@ -1871,21 +1880,19 @@ function updateHiddenServers() {
 
 		const server = Server.getById(match[1]);
 
-		if (server.isShownInList()){
-			$(guild).show();
+		if (server.isShownInList()) {
+			$(guild).removeAttr('style');
 		} else {
-			$(guild).hide();
+			$(guild).animate({ width: 0, height: 0 }, 500, 'swing', function () {
+				$(this).hide();
+			});
 		}
-
-		console.log(`${server.name} (${server.id}) ${server.isShownInPicker() ? 'is' : 'isn\'t'} shown`);
 
 		return guild;
 	});
 }
 
 exports.updateHiddenServers = updateHiddenServers;
-
-window.updateHiddenServers = updateHiddenServers;
 
 exports.inject = injectPanel;
 
