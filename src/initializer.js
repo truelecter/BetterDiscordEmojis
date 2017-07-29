@@ -61,9 +61,8 @@ function parseServer({ id: serverId, permissions: serverPermissions }) {
 		return emojis
 			.map(e => emojiContext.getById(e.id))
 			.filter(e => !!e)
-			.map(Emoji.fromRaw)
 			.reduce(function (server, emoji) {
-				server.addEmoji(emoji);
+				server.addEmoji(Emoji.fromRaw(emoji));
 				return server;
 			}, server);
 	});
