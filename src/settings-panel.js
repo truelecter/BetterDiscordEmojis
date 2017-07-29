@@ -73,6 +73,7 @@ function buildContentColumn() {
 		value: Settings.get('enabled'),
 		change: (value) => {
 			Settings.set('enabled', value);
+			updateHiddenServers();
 		}
 	}));
 
@@ -253,7 +254,7 @@ function updateHiddenServers() {
 
 		const server = Server.getById(match[1]);
 
-		if (server.isShownInList()) {
+		if (server.isShownInList() || !Settings.get('enabled', true)) {
 			$(guild).removeAttr('style');
 		} else {
 			$(guild).animate({ width: 0, height: 0 }, 500, 'swing', function () {
