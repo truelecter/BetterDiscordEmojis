@@ -23,7 +23,10 @@ const Server = require('./server.js');
 function buildSidebarEntry() {
 	const $entry = $('<span/>');
 
-	const $button = $('<div/>').addClass(SETTINGS_CLASSES.itemDefault).addClass(SIDEBAR_BUTTON_CLASS).html('Better Emojis');
+	const $button = $('<div/>')
+		.addClass(SETTINGS_CLASSES.itemDefault)
+		.addClass(SIDEBAR_BUTTON_CLASS)
+		.html('Better Emojis');
 
 	$button.mousedown(function () {
 		const $this = $(this);
@@ -93,9 +96,11 @@ function getServersIcons() {
 	$('.guild').map((i, guild) => {
 		const $avatar = $(guild).find('.avatar-small');
 		const match = SERVER_REGEX.exec($avatar.attr('href'));
+
 		if (!match) {
 			return guild;
 		}
+
 		guildsIcons[`${match[1]}`] = BACKGOUND_URL_REGEX.exec($avatar.attr('style'))[1];
 		return guild;
 	});
@@ -119,7 +124,8 @@ function injectPanel(layer) {
 			$contentColumn.hide();
 			$button.removeClass(SETTINGS_CLASSES.itemDefaultSelected).addClass(SETTINGS_CLASSES.itemDefault);
 		})
-		.filter((index, element) => $(element).text() === TRANSLATION_MODULE.Messages.CHANGE_LOG).before($entry);
+		.filter((index, element) => $(element).text() === TRANSLATION_MODULE.Messages.CHANGE_LOG)
+		.before($entry);
 
 	$button.mousedown(() => {
 		$contentRegion.find('.content-column').hide();
@@ -145,6 +151,7 @@ function getClasses(from, what) {
 }
 
 function checkbox({ setting, name, description, value, change }) {
+	//jscs:disable maximumLineLength
 	return $(`
 		<div class="${[FLEX_CHILD_CLASSES.flex, getClasses(FLEX_CLASSES, ['vertical', 'justifyStart', 'alignStretch', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
 			<div class="${[getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
@@ -161,7 +168,10 @@ function checkbox({ setting, name, description, value, change }) {
 			</div>
 			<div class="${DIVIDER_ITEM_CLASSES.divider} ${SWITCH_ITEM_CLASSES.divider}"></div>
 		</div>
-		`).on('click', function () {
+		`)
+
+		//jscs:enable maximumLineLength
+		.on('click', function () {
 			const $this = $(this).find(`.${SWITCH_CLASSES.switch}`);
 
 			$this.toggleClass(SWITCH_CLASSES.checked);
@@ -173,6 +183,7 @@ function checkbox({ setting, name, description, value, change }) {
 }
 
 function serverCard(server, iconStorage) {
+	//jscs:disable maximumLineLength
 	const $card = $(`
 		<div class="${CARD_CLASSES.cardPrimary} ${SERVER_CARD_CLASSES.serverCard}" id="server-card-${server.id}" style="padding: 7px">
 			<div class="${getClasses(FLEX_CLASSES, ['horizontal', 'flex', 'justifyStart', 'alignStretch', 'noWrap'])}">
@@ -207,6 +218,7 @@ function serverCard(server, iconStorage) {
 		</div>
 	`);
 
+	//jscs:enable maximumLineLength
 	$card.find(`.${SERVER_CARD_CLASSES.showInServerList}`).click(function () {
 		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInServerListSwitch}`);
 
@@ -244,7 +256,7 @@ function updateHiddenServers() {
 		if (server.isShownInList()) {
 			$(guild).removeAttr('style');
 		} else {
-			$(guild).animate({width: 0, height: 0}, 500, 'swing', function(){
+			$(guild).animate({ width: 0, height: 0 }, 500, 'swing', function () {
 				$(this).hide();
 			});
 		}

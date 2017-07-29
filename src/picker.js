@@ -164,7 +164,7 @@ function addCurrentMessageReaction(emoji) {
 
 function addMessageReaction(channel, message, emoji) {
 	return fetchURL({
-		url: `${API_BASE}/channels/${channel}/messages/${message}/reactions/:${emoji.name}:${emoji.id}/@me`,
+		url: `${API_BASE}/channels/${channel}/messages/${message}/reactions/:${emoji.name}:${emoji.id}/@me`, //jscs:disable maximumLineLength
 		method: 'PUT',
 		dataType: 'json',
 	});

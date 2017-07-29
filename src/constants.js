@@ -1,5 +1,6 @@
 'use strict';
 
+//jscs: disable maximumLineLength
 exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
