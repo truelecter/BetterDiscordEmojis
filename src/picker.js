@@ -17,7 +17,8 @@ const {
 	CURRENT_SELECTED_CHANNEL_REGEX,
 	ELEMENT_SERVER_EMOJI_LIST_ROW_ENTRY,
 	EMOJI_BUTTON_CLASS,
-	CHANNEL_TEXTAREA_CLASS
+	CHANNEL_TEXTAREA_CLASS,
+	CUSTOM_EMOJI_STORAGE_MODULE,
 } = require('./constants.js');
 
 let commonEmojisSpansCache = '';
@@ -62,6 +63,8 @@ function buildScrollerWrap() {
 		contentElem: $scr[0]
 	});
 
+	const serverContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(currentServer.id);
+
 	const emojiClickHandler = $(`.${EMOJI_BUTTON_CLASS}`).hasClass('popout-open')
 		? putEmojiInTextarea
 		: addCurrentMessageReaction;
@@ -71,7 +74,7 @@ function buildScrollerWrap() {
 		console.log('Selected emoji - ', Emoji.getById($(e.target).attr('data-emoji')));
 	})
 	.on('click', '.emoji-item', e => {
-		emojiClickHandler(Emoji.getById($(e.target).attr('data-emoji')));
+		emojiClickHandler(serverContext.getById($(e.target).attr('data-emoji')));
 	})
 	.on('mouseenter', '.emoji-item', e => {
 		$(e.target).addClass('selected');
@@ -127,7 +130,7 @@ function buildEmojisRows(eL) {
 function putEmojiInTextarea(emoji) {
 	const $textarea = $(`.${CHANNEL_TEXTAREA_CLASS} >> textarea`);
 
-	$textarea.val($textarea.val() + emoji.useName + ' ');
+	$textarea.val($textarea.val() + (emoji.require_colons ? `:${emoji.name}:` : emoji.name));
 }
 
 function findReact(dom) {
