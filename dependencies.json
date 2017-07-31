@@ -5,6 +5,10 @@
 	},
 	{
 		"type": "script",
+		"url": "https://raw.githubusercontent.com/TrueLecter/BetterDiscordEmojis/dist/uikit.min.js"
+	},
+	{
+		"type": "script",
 		"url": "https://raw.githubusercontent.com/TrueLecter/BetterDiscordEmojis/dist/better-emojis.min.js"	
 	},
 	{
