@@ -75,7 +75,18 @@ function serverCard(server, iconStorage, onServerChangeState) {
 	function emojiItem(emoji) {
 		return $('<div class="be-emoji-item"></div>')
 			.css('background-image', `url("${emoji.url}")`)
-			.data('emoji-id', `${emoji.id}`);
+			.data('emoji-id', `${emoji.id}`)
+			.dblclick(function () {
+				const $this = $(this).detach();
+
+				if (Settings.get(`picker.emoji.enabled.${emoji.id}`, true)) {
+					$disabledEmojis.append($this);
+				} else {
+					$enabledEmojis.append($this);
+				}
+
+				handleChange();
+			});
 	}
 
 	function handleChange() {
