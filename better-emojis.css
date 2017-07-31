@@ -22,3 +22,106 @@
     background-color: none;
     background-position: 50%;
 }
+
+.be-emoji-container-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-content: flex-start;
+}
+
+.be-emoji-container-wrapper .container-title {
+    flex: 0;
+}
+
+.be-emoji-container-wrapper .be-emoji-container {
+    flex: 1;
+}
+
+.be-emoji-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.be-emoji-item {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    background-position: 50%;
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin: 2px 0 2px 4px;
+    cursor: pointer;
+}
+
+.be-accordion-data .container {
+    display: flex;
+}
+
+.be-accordion-data .container .enabled-emoji-container {
+    width: 322px;
+}
+
+.be-accordion-data .container .disabled-emoji-container {
+    width: 100%;
+}
+
+.be-accordion-data .container .container-title{
+    text-align: center;
+}
+
+.uk-sortable-drag .be-accordion-data {
+    display: none;
+}
+
+/* ========================================================================
+   Component: Sortable
+ ========================================================================== */
+.uk-sortable {
+  position: relative;
+}
+/*
+ * Deactivate browser touch actions in IE11
+ */
+.uk-sortable > * {
+  touch-action: none;
+}
+/*
+ * Deactivate pointer-events on SVGs in Safari
+ */
+.uk-sortable svg {
+  pointer-events: none;
+}
+/*
+ * Remove margin from the last-child
+ */
+.uk-sortable > :last-child {
+  margin-bottom: 0;
+}
+/* Drag
+ ========================================================================== */
+.uk-sortable-drag {
+  position: absolute !important;
+  z-index: 1050 !important;
+  pointer-events: none;
+}
+/* Placeholder
+ ========================================================================== */
+.uk-sortable-placeholder {
+  opacity: 0;
+}
+/* Empty modifier
+ ========================================================================== */
+.uk-sortable-empty {
+  min-height: 50px;
+}
+/* Handle
+ ========================================================================== */
+/* Hover */
+.uk-sortable-handle:hover {
+  cursor: move;
+}

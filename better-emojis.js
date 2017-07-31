@@ -418,6 +418,54 @@ process.umask = function() { return 0; };
 },{}],4:[function(require,module,exports){
 'use strict';
 
+const { getClasses } = require('./helpers.js');
+
+const {
+	SWITCH_CLASSES,
+	FLEX_CHILD_CLASSES,
+	FLEX_CLASSES,
+	HEADER_CLASSES,
+	SWITCH_ITEM_CLASSES,
+	DIVIDER_ITEM_CLASSES,
+	LABEL_ITEM_CLASSES,
+	FONT_SIZE_CLASSES,
+} = require('./classes.js');
+
+function checkbox({ setting, name, description, value, change }) {
+	//jscs:disable maximumLineLength
+	return $(`
+		<div class="${[FLEX_CHILD_CLASSES.flex, getClasses(FLEX_CLASSES, ['vertical', 'justifyStart', 'alignStretch', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
+			<div class="${[getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
+				<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.title, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
+					${name}
+				</h3>
+				<div class="${SWITCH_CLASSES.switchWrapperDefaultActive} ${FLEX_CHILD_CLASSES.flexChild}" style="flex: 0 0 auto;">
+					<input type="checkbox" class="${SWITCH_CLASSES.checkbox}" value="on">
+					<div class="${SWITCH_CLASSES.switch} ${value ? SWITCH_CLASSES.checked : ''}"></div>
+				</div>
+			</div>
+			<div class="${[LABEL_ITEM_CLASSES.description, SWITCH_ITEM_CLASSES.note, LABEL_ITEM_CLASSES.modeDefault, FONT_SIZE_CLASSES.primary].join(' ')}" style="flex: 1 1 auto; ${description ? '' : 'display: none;'}">
+				${description}
+			</div>
+			<div class="${DIVIDER_ITEM_CLASSES.divider} ${SWITCH_ITEM_CLASSES.divider}"></div>
+		</div>
+		`) //jscs:enable maximumLineLength
+		.on('click', function () {
+			const $this = $(this).find(`.${SWITCH_CLASSES.switch}`);
+
+			$this.toggleClass(SWITCH_CLASSES.checked);
+
+			if (typeof change === 'function') {
+				change($this.hasClass(SWITCH_CLASSES.checked));
+			}
+		});
+}
+
+module.exports = checkbox;
+
+},{"./classes.js":5,"./helpers.js":8}],5:[function(require,module,exports){
+'use strict';
+
 exports.SETTINGS_CLASSES = n(2392);
 exports.SWITCH_CLASSES = n(2390);
 exports.FLEX_CHILD_CLASSES = n(2374);
@@ -443,7 +491,7 @@ function n(id) {
 	return webpackJsonp([], [], [id]);
 }
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 //jscs: disable maximumLineLength
@@ -455,6 +503,8 @@ exports.EMOJI_BUTTON_CLASS = n(2367).emojiButton;
 exports.CHANNEL_TEXTAREA_CLASS = n(2367).channelTextArea;
 exports.LOCAL_STORAGE_MODULE = n(1786);
 exports.EMOJI_STORAGE_MODULE = n(174).default;
+exports.SERVERS_STORAGE_MODULE = n(15);
+exports.SERVERS_PERMISSIONS_MODULE = n(58);
 exports.TRANSLATION_MODULE = n(3);
 exports.CUSTOM_EMOJI_STORAGE_MODULE = n(204);
 exports.TOKEN_KEY = n(0).TOKEN_KEY;
@@ -489,7 +539,7 @@ function n(id) {
 	return webpackJsonp([], [], [id]);
 }
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 const id = Symbol('id');
@@ -565,7 +615,7 @@ class Emoji {
 
 module.exports = Emoji;
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 const { defaultFetchOptions } = require('./constants');
@@ -585,13 +635,29 @@ exports.fetchURL = function fetchURL(options) {
 	});
 };
 
-},{"./constants":5}],8:[function(require,module,exports){
+exports.getClasses = function getClasses(from, what) {
+	if (!(what instanceof Array))
+		return from[what];
+
+	const res = [];
+
+	for (const key of what) {
+		if (typeof from[key] === 'undefined') {
+			console.warn(from, `doesn't have property ${key}. Check module numbers`);
+		}
+
+		res.push(from[key]);
+	}
+
+	return res.join(' ');
+};
+
+},{"./constants":6}],9:[function(require,module,exports){
 'use strict';
 
 const Server = require('./server.js');
 const Emoji = require('./emoji.js');
 const Picker = require('./picker.js');
-const { fetchURL } = require('./helpers.js');
 const {
 	API_BASE,
 	TOKEN_KEY,
@@ -599,61 +665,43 @@ const {
 	EMOJI_STORAGE_MODULE,
 	LOCAL_STORAGE_MODULE,
 	CUSTOM_EMOJI_STORAGE_MODULE,
+	SERVERS_STORAGE_MODULE,
+	SERVERS_PERMISSIONS_MODULE,
 } = require('./constants.js');
 
-let MY_ID = '';
-
 function getServers() {
-	return fetchURL({
-		url: `${API_BASE}/users/@me/guilds`,
-		dataType: 'json'
+	return new Promise((resolve, reject) => {
+		if (!SERVERS_STORAGE_MODULE || !SERVERS_STORAGE_MODULE.getGuilds) {
+			reject(new Error('Server storage module is not pointing to server storage'));
+		}
+
+		resolve(Object.values(SERVERS_STORAGE_MODULE.getGuilds()));
 	});
 }
 
-function getMyId() {
-	return fetchURL({
-		url: `${API_BASE}/users/@me`,
-		dataType: 'json'
-	})
-	.then((response) => {
-		MY_ID = response.id;
+function parseServer({ id, name }) {
+	return new Promise((resolve, reject) => {
+		if (!SERVERS_PERMISSIONS_MODULE || !SERVERS_PERMISSIONS_MODULE.getGuildPermissions) {
+			reject(new Error('Server permission module is not pointing to permission storage'));
+		}
 
-		return response;
-	});
-}
+		if (!CUSTOM_EMOJI_STORAGE_MODULE ||
+			!CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext) {
+			reject(new Error('Custom emoji storage module is not pointing to custom emoji storage'));
+		}
 
-function parseServer({ id: serverId, permissions: serverPermissions }) {
-	return fetchURL({
-		url: `${API_BASE}/guilds/${serverId}/members/${MY_ID}`,
-		dataType: 'json'
-	})
-	.then(({ roles }) => (
-		fetchURL({
-			url: `${API_BASE}/guilds/${serverId}`,
-			dataType: 'json'
-		})
-		.then(({ id, name, emojis }) => ({
-			id,
-			name,
-			roles,
-			emojis
-		}))
-	))
-	.then(({ id, name, emojis, roles }) => {
-		// now we got detailed info about server. fill emoji and managed emojis.
-		// also set name
-		const server = new Server(id, name, serverPermissions);
+		const server = new Server(id, name, SERVERS_PERMISSIONS_MODULE.getGuildPermissions(id));
 		const emojiContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(id);
 
 		// Eventually, CUSTOM_EMOJI_STORAGE_MODULE filters emojis that we can't use by itself!
-		return emojis
+		resolve(CUSTOM_EMOJI_STORAGE_MODULE.getGuildEmoji(`${id}`)
 			.map(e => emojiContext.getById(e.id))
 			.filter(e => !!e)
-			.map(Emoji.fromRaw)
 			.reduce(function (server, emoji) {
-				server.addEmoji(emoji);
+				server.addEmoji(Emoji.fromRaw(emoji));
 				return server;
-			}, server);
+			}, server)
+		);
 	});
 }
 
@@ -707,8 +755,7 @@ function doGetEmojis() {
 		}
 	});
 
-	return getMyId()
-		.then(getServers)
+	return getServers()
 		.then(parseServers)
 		.then(loadStandartEmojis)
 		.catch(e => {
@@ -718,7 +765,7 @@ function doGetEmojis() {
 
 module.exports = doGetEmojis;
 
-},{"./constants.js":5,"./emoji.js":6,"./helpers.js":7,"./picker.js":12,"./server.js":13}],9:[function(require,module,exports){
+},{"./constants.js":6,"./emoji.js":7,"./picker.js":13,"./server.js":14}],10:[function(require,module,exports){
 /*! Clusterize.js - v0.17.6 - 2017-03-05
  * http://NeXTs.github.com/Clusterize.js/
  * Copyright (c) 2015 Denis Lukov; Licensed GPLv3 */
@@ -1072,7 +1119,7 @@ module.exports = doGetEmojis;
 	return Clusterize
 }))
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 const Picker = require('./picker.js');
@@ -1144,7 +1191,7 @@ initEmojis().then((spanCache) => {
 	}, 2000);
 });
 
-},{"./constants.js":5,"./initializer.js":8,"./observer.js":11,"./picker.js":12,"./settings-panel.js":14,"./settings.js":15}],11:[function(require,module,exports){
+},{"./constants.js":6,"./initializer.js":9,"./observer.js":12,"./picker.js":13,"./settings-panel.js":16,"./settings.js":17}],12:[function(require,module,exports){
 'use strict';
 
 const observer = Symbol('observer');
@@ -1248,7 +1295,7 @@ class ChildAddRemoveObserver {
 
 module.exports.ChildAddRemoveObserver = ChildAddRemoveObserver;
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 const Clusterize = require('./lib/clusterize.js');
@@ -1294,10 +1341,13 @@ function buildScrollerWrap() {
 	// Append all other server shared emojis
 	if (currentServer.canUseExternalEmojis) {
 		for (const server of Server.getAllServers()) {
-			if (!server.isCurrent() && server.isShownInPicker()
-				&& server.sharedEmojis.length > 0 && IS_NUMBER_REGEX.test(server.id)
+			let availableEmojis = server.availableEmojis();
+			if (!server.isCurrent()
+				&& server.isShownInPicker()
+				&& IS_NUMBER_REGEX.test(server.id)
+				&& availableEmojis.length > 0
 			) {
-				$scr.append(buildServerSpan(server));
+				$scr.append(buildServerSpan(server, availableEmojis));
 			}
 		}
 	}
@@ -1345,11 +1395,12 @@ function buildScrollerWrap() {
 	return $wrap;
 }
 
-function buildServerSpan(server) {
+function buildServerSpan(server, availableEmojis) {
 	const $emojiList = $(ELEMENT_SERVER_EMOJI_LIST);
+	const emojis = availableEmojis || server.availableEmojis();
 
 	$emojiList.find('.category').html(server.name);
-	$emojiList.append(buildEmojisRows(server.availableEmojis()));
+	$emojiList.append(buildEmojisRows(emojis));
 
 	return $emojiList.html();
 }
@@ -1499,7 +1550,7 @@ module.exports.setCommonEmojiSpanCache = function (cache) {
 	commonEmojisSpansCache = cache;
 };
 
-},{"./constants.js":5,"./emoji.js":6,"./helpers":7,"./lib/clusterize.js":9,"./server.js":13,"./settings.js":15}],13:[function(require,module,exports){
+},{"./constants.js":6,"./emoji.js":7,"./helpers":8,"./lib/clusterize.js":10,"./server.js":14,"./settings.js":17}],14:[function(require,module,exports){
 'use strict';
 
 const Emoji = require('./emoji.js');
@@ -1581,7 +1632,8 @@ class Server {
 	}
 
 	availableEmojis() {
-		return this.isCurrent() ? this.emojis : this.sharedEmojis;
+		const emojiList = this.isCurrent() ? this.emojis : this.sharedEmojis;
+		return emojiList.filter(e => Settings.get(`picker.emoji.enabled.${e.id}`, true));
 	}
 
 	possibleEmojis() {
@@ -1610,12 +1662,23 @@ class Server {
 		return GLOBAL_SERVER_LIST.reduce((p, c) => (p || (c.isCurrent() && c)), false) || null;
 	}
 
-	static getAllServers() {
+	static getAllServersUnordered() {
 		return GLOBAL_SERVER_LIST;
 	}
 
+	static getAllServers() {
+		if (Settings.get('picker.serversorder', false)) {
+			const order = Settings.get('picker.serversorder');
+			return GLOBAL_SERVER_LIST.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+		} else {
+			servers.push(...GLOBAL_SERVER_LIST);
+			Settings.set('picker.serversorder', servers.map(c => c.id));
+			return servers;
+		}
+	}
+
 	static getById(id) {
-		return GLOBAL_SERVER_LIST.reduce((p, c) => (p || ((c.id === id) && c)), false) || null;
+		return GLOBAL_SERVER_LIST.reduce((p, c) => (p || ((c.id == id) && c)), false) || null;
 	}
 }
 
@@ -1624,21 +1687,186 @@ new Server('@me', '@me', 0x00040000); // eslint-disable-line no-new
 
 module.exports = Server;
 
-},{"./emoji.js":6,"./settings.js":15}],14:[function(require,module,exports){
+},{"./emoji.js":7,"./settings.js":17}],15:[function(require,module,exports){
 'use strict';
 
+const { getClasses } = require('./helpers.js');
+
 const {
-	SETTINGS_CLASSES,
-	SIDEBAR_BUTTON_CLASS,
 	SWITCH_CLASSES,
 	FLEX_CHILD_CLASSES,
 	FLEX_CLASSES,
 	HEADER_CLASSES,
 	SWITCH_ITEM_CLASSES,
 	DIVIDER_ITEM_CLASSES,
-	LABEL_ITEM_CLASSES,
-	FONT_SIZE_CLASSES,
 	CARD_CLASSES,
+	SERVER_CARD_CLASSES,
+} = require('./classes.js');
+
+const Settings = require('./settings.js');
+
+function serverCard(server, iconStorage, onServerChangeState) {
+	//jscs:disable maximumLineLength
+	const $card = $(`
+		<div class="be-accordion-item ${CARD_CLASSES.cardPrimary} ${SERVER_CARD_CLASSES.serverCard}" id="server-card-${server.id}" style="padding: 7px">
+			<div class="be-accordion-title ${getClasses(FLEX_CLASSES, ['horizontal', 'flex', 'justifyStart', 'alignStretch', 'noWrap'])}">
+				<div class="${FLEX_CHILD_CLASSES.flexChild}" style="padding-right: 15px;">
+					<img class="${SERVER_CARD_CLASSES.icon}" src="${iconStorage[server.id]}"/>
+				</div>
+				<div class="${FLEX_CHILD_CLASSES.flexChild} ${FLEX_CLASSES.vertical}" style="width: 60%">
+					<h5 class="${FLEX_CHILD_CLASSES.flexChild} ${HEADER_CLASSES.h5} margin-bottom-4">${server.name}</h5>
+					<h5 class="${FLEX_CHILD_CLASSES.flexChild} ${HEADER_CLASSES.h5} margin-bottom-4">Emojis: ${server.emojis.length}, BBTV: ${server.sharedEmojis.length}</h5>	
+				</div>
+				<div class="${FLEX_CHILD_CLASSES.flexChild} ${FLEX_CLASSES.vertical}" style="flex: 1 1 auto;">
+					<div class="margin-bottom-4 ${[SERVER_CARD_CLASSES.showInPicker, getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
+						<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.title, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
+							Picker
+						</h3>
+						<div class="${SWITCH_CLASSES.switchWrapperDefaultActive} ${FLEX_CHILD_CLASSES.flexChild}" style="flex: 0 0 auto;">
+							<input type="checkbox" class="${SWITCH_CLASSES.checkbox}" value="on">
+							<div class="${SWITCH_CLASSES.switch} ${server.isShownInPicker() ? SWITCH_CLASSES.checked : ''} ${SERVER_CARD_CLASSES.showInPickerSwitch}"></div>
+						</div>
+					</div>
+					<div class="margin-bottom-4 ${[SERVER_CARD_CLASSES.showInServerList, getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
+						<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.title, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
+							Server list
+						</h3>
+						<div class="${SWITCH_CLASSES.switchWrapperDefaultActive} ${FLEX_CHILD_CLASSES.flexChild}" style="flex: 0 0 auto;">
+							<input type="checkbox" class="${SWITCH_CLASSES.checkbox}" value="on">
+							<div class="${SWITCH_CLASSES.switch} ${server.isShownInList() ? SWITCH_CLASSES.checked : ''} ${SERVER_CARD_CLASSES.showInServerListSwitch}"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="be-accordion-data">
+				<div class="${DIVIDER_ITEM_CLASSES.divider}" style="margin-top: 4px; margin-bottom: 7px;"></div>
+				<div class="container">
+					<div class="be-emoji-container-wrapper">
+						<h3 class="container-title ${getClasses(HEADER_CLASSES, ['h3', 'defaultColor'])}">
+							Enabled Emojis
+						</h3>
+						<div class="${CARD_CLASSES.cardPrimary} be-emoji-container enabled-emoji-container"></div>
+					</div>
+					<div class="be-emoji-container-wrapper" style="padding-left:5px">
+						<h3 class="container-title ${getClasses(HEADER_CLASSES, ['h3', 'defaultColor'])}">
+							Disabled Emojis
+						</h3>
+						<div class="${CARD_CLASSES.cardPrimary} be-emoji-container disabled-emoji-container"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	`); //jscs:enable maximumLineLength
+
+	const $enabledEmojis = $card.find('.enabled-emoji-container');
+	const $disabledEmojis = $card.find('.disabled-emoji-container');
+	const $accordionContent = $card.find('.be-accordion-data');
+
+	function emojiItem(emoji) {
+		return $('<div class="be-emoji-item"></div>')
+			.css('background-image', `url("${emoji.url}")`)
+			.data('emoji-id', `${emoji.id}`)
+			.dblclick(function () {
+				const $this = $(this).detach();
+
+				if (Settings.get(`picker.emoji.enabled.${emoji.id}`, true)) {
+					$disabledEmojis.append($this);
+				} else {
+					$enabledEmojis.append($this);
+				}
+
+				handleChange();
+			});
+	}
+
+	function handleChange() {
+		$enabledEmojis
+			.children()
+			.map((i, c) => Settings.set(`picker.emoji.enabled.${$(c).data('emoji-id')}`, true));
+		$disabledEmojis
+			.children()
+			.map((i, c) => Settings.set(`picker.emoji.enabled.${$(c).data('emoji-id')}`, false));
+	}
+
+	let enabledEmojisSortable;
+	let disabledEmojisSortable;
+
+	$enabledEmojis.on('change', handleChange);
+	$disabledEmojis.on('change', handleChange);
+
+	$card.data('server-id', server.id);
+
+	$card.on('accordion.close', () => {
+		handleChange();
+		$enabledEmojis.html('');
+		$disabledEmojis.html('');
+		enabledEmojisSortable.$destroy();
+		disabledEmojisSortable.$destroy();
+	});
+
+	$card.on('accordion.open', () => {
+		for (const emoji of server.emojis) {
+			if (Settings.get(`picker.emoji.enabled.${emoji.id}`, true)) {
+				$enabledEmojis.append(emojiItem(emoji));
+			} else {
+				$disabledEmojis.append(emojiItem(emoji));
+			}
+		}
+
+		//FIXME sortable shaking while movening element
+		enabledEmojisSortable = UIkit.sortable($enabledEmojis, {
+			group: `emoji-sortable-${server.id}`,
+			animation: 150,
+			'cls-base': 'be-emoji-container',
+			'cls-item': 'be-emoji-item',
+			'cls-empty': 'be-empty-sortable',
+		});
+
+		disabledEmojisSortable = UIkit.sortable($disabledEmojis, {
+			group: `emoji-sortable-${server.id}`,
+			animation: 150,
+			'cls-base': 'be-emoji-container',
+			'cls-item': 'be-emoji-item',
+			'cls-empty': 'be-empty-sortable',
+		});
+	});
+
+	$card.find(`.${SERVER_CARD_CLASSES.showInServerList}`).click(function (e) {
+		e.stopPropagation();
+
+		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInServerListSwitch}`);
+		$switch.toggleClass(SWITCH_CLASSES.checked);
+
+		const isShown = $switch.hasClass(SWITCH_CLASSES.checked);
+
+		Settings.set(`serverlist.show.${server.id}`, isShown);
+
+		onServerChangeState && onServerChangeState(server, isShown);
+	});
+
+	$card.find(`.${SERVER_CARD_CLASSES.showInPicker}`).click(function (e) {
+		e.stopPropagation();
+
+		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInPickerSwitch}`);
+		$switch.toggleClass(SWITCH_CLASSES.checked);
+
+		Settings.set(`picker.server.show.${server.id}`, $switch.hasClass(SWITCH_CLASSES.checked));
+	});
+
+	return $card;
+}
+
+module.exports = serverCard;
+
+},{"./classes.js":5,"./helpers.js":8,"./settings.js":17}],16:[function(require,module,exports){
+'use strict';
+
+const { getClasses } = require('./helpers.js');
+
+const {
+	SETTINGS_CLASSES,
+	SIDEBAR_BUTTON_CLASS,
+	HEADER_CLASSES,
 	SERVER_CARD_CLASSES,
 } = require('./classes.js');
 
@@ -1646,6 +1874,9 @@ const { TRANSLATION_MODULE } = require('./constants.js');
 
 const Settings = require('./settings.js');
 const Server = require('./server.js');
+
+const serverCard = require('./serverCard.js');
+const checkbox = require('./checkbox.js');
 
 function buildSidebarEntry() {
 	const $entry = $('<span/>');
@@ -1677,6 +1908,61 @@ function changeClasses(from, to, parent = null) {
 	return (parent == null ? $(classes) : $(parent).find(classes)).removeClass(from).addClass(to);
 }
 
+function buildServerCards() {
+	const guildsIcons = getServersIcons();
+
+	const $serverSortable = $('<div class="be-server-sortable"></div>');
+
+	const servers = Server.getAllServers();
+
+	for (const server of servers) {
+		if (server.isGuild())
+			$serverSortable.append(serverCard(server, guildsIcons));
+	}
+
+	const serversAccordion = UIkit.accordion($serverSortable, {
+		duration: 150,
+		targets: '> .be-accordion-item',
+		toggle: '> .be-accordion-title',
+		content: '> .be-accordion-data',
+	});
+
+	UIkit.sortable($serverSortable, {
+		animation: 150,
+		'cls-item': SERVER_CARD_CLASSES.serverCard,
+	});
+
+	$serverSortable.on('start', function (event, sortable, target, dragged) {
+		// console.log(arguments);
+		if (target.hasClass('uk-open')) {
+			serversAccordion.toggle(target, false);
+			dragged.css({ height: target.outerHeight() });
+		}
+	});
+
+	$serverSortable.on('beforeshow', function (event, accordion) {
+		$(event.target).closest('.be-accordion-item').trigger('accordion.open');
+	});
+
+	$serverSortable.on('hidden', function (event, accordion) {
+		$(event.target).closest('.be-accordion-item').trigger('accordion.close');
+	});
+
+	$serverSortable.on('change', function (event, sortable, target) {
+		const $children = sortable.$el.children();
+		const out = [];
+		out.length = $children.length;
+
+		for (let i = 0; i < $children.length; i++) {
+			out[i] = $($children[i]).data('server-id');
+		}
+
+		Settings.set('picker.serversorder', out);
+	});
+
+	return $serverSortable;
+}
+
 function buildContentColumn() {
 	const $column = $(`
 	<div class="content-column default"><div>
@@ -1704,13 +1990,7 @@ function buildContentColumn() {
 		}
 	}));
 
-	const guildsIcons = getServersIcons();
-	const servers = Server.getAllServers();
-
-	for (const server of servers) {
-		if (server.isGuild())
-			$contentDiv.append(serverCard(server, guildsIcons));
-	}
+	$contentDiv.append(buildServerCards());
 
 	return $column;
 }
@@ -1761,115 +2041,6 @@ function injectPanel(layer) {
 	});
 }
 
-function getClasses(from, what) {
-	if (!(what instanceof Array))
-		return from[what];
-
-	const res = [];
-
-	for (const key of what) {
-		if (typeof from[key] === 'undefined') {
-			console.warn(from, `doesn't have property ${key}. Check module numbers`);
-		}
-
-		res.push(from[key]);
-	}
-
-	return res.join(' ');
-}
-
-function checkbox({ setting, name, description, value, change }) {
-	//jscs:disable maximumLineLength
-	return $(`
-		<div class="${[FLEX_CHILD_CLASSES.flex, getClasses(FLEX_CLASSES, ['vertical', 'justifyStart', 'alignStretch', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
-			<div class="${[getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
-				<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.title, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
-					${name}
-				</h3>
-				<div class="${SWITCH_CLASSES.switchWrapperDefaultActive} ${FLEX_CHILD_CLASSES.flexChild}" style="flex: 0 0 auto;">
-					<input type="checkbox" class="${SWITCH_CLASSES.checkbox}" value="on">
-					<div class="${SWITCH_CLASSES.switch} ${value ? SWITCH_CLASSES.checked : ''}"></div>
-				</div>
-			</div>
-			<div class="${[LABEL_ITEM_CLASSES.description, SWITCH_ITEM_CLASSES.note, LABEL_ITEM_CLASSES.modeDefault, FONT_SIZE_CLASSES.primary].join(' ')}" style="flex: 1 1 auto; ${description ? '' : 'display: none;'}">
-				${description}
-			</div>
-			<div class="${DIVIDER_ITEM_CLASSES.divider} ${SWITCH_ITEM_CLASSES.divider}"></div>
-		</div>
-		`)
-
-		//jscs:enable maximumLineLength
-		.on('click', function () {
-			const $this = $(this).find(`.${SWITCH_CLASSES.switch}`);
-
-			$this.toggleClass(SWITCH_CLASSES.checked);
-
-			if (typeof change === 'function') {
-				change($this.hasClass(SWITCH_CLASSES.checked));
-			}
-		});
-}
-
-function serverCard(server, iconStorage) {
-	//jscs:disable maximumLineLength
-	const $card = $(`
-		<div class="${CARD_CLASSES.cardPrimary} ${SERVER_CARD_CLASSES.serverCard}" id="server-card-${server.id}" style="padding: 7px">
-			<div class="${getClasses(FLEX_CLASSES, ['horizontal', 'flex', 'justifyStart', 'alignStretch', 'noWrap'])}">
-				<div class="${FLEX_CHILD_CLASSES.flexChild}" style="padding-right: 15px;">
-					<img class="${SERVER_CARD_CLASSES.icon}" src="${iconStorage[server.id]}"/>
-				</div>
-				<div class="${FLEX_CHILD_CLASSES.flexChild} ${FLEX_CLASSES.vertical}" style="width: 60%">
-					<h5 class="${FLEX_CHILD_CLASSES.flexChild} ${HEADER_CLASSES.h5} margin-bottom-4">${server.name}</h5>
-					<h5 class="${FLEX_CHILD_CLASSES.flexChild} ${HEADER_CLASSES.h5} margin-bottom-4">Emojis: ${server.emojis.length}, BBTV: ${server.sharedEmojis.length}</h5>	
-				</div>
-				<div class="${FLEX_CHILD_CLASSES.flexChild} ${FLEX_CLASSES.vertical}" style="flex: 1 1 auto;">
-					<div class="margin-bottom-4 ${[SERVER_CARD_CLASSES.showInPicker, getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
-						<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.title, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
-							Picker
-						</h3>
-						<div class="${SWITCH_CLASSES.switchWrapperDefaultActive} ${FLEX_CHILD_CLASSES.flexChild}" style="flex: 0 0 auto;">
-							<input type="checkbox" class="${SWITCH_CLASSES.checkbox}" value="on">
-							<div class="${SWITCH_CLASSES.switch} ${server.isShownInPicker() ? SWITCH_CLASSES.checked : ''} ${SERVER_CARD_CLASSES.showInPickerSwitch}"></div>
-						</div>
-					</div>
-					<div class="margin-bottom-4 ${[SERVER_CARD_CLASSES.showInServerList, getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
-						<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.title, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
-							Server list
-						</h3>
-						<div class="${SWITCH_CLASSES.switchWrapperDefaultActive} ${FLEX_CHILD_CLASSES.flexChild}" style="flex: 0 0 auto;">
-							<input type="checkbox" class="${SWITCH_CLASSES.checkbox}" value="on">
-							<div class="${SWITCH_CLASSES.switch} ${server.isShownInList() ? SWITCH_CLASSES.checked : ''} ${SERVER_CARD_CLASSES.showInServerListSwitch}"></div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	`);
-
-	//jscs:enable maximumLineLength
-	$card.find(`.${SERVER_CARD_CLASSES.showInServerList}`).click(function () {
-		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInServerListSwitch}`);
-
-		$switch.toggleClass(SWITCH_CLASSES.checked);
-
-		const isShown = $switch.hasClass(SWITCH_CLASSES.checked);
-
-		Settings.set(`serverlist.show.${server.id}`, isShown);
-
-		updateHiddenServers();
-	});
-
-	$card.find(`.${SERVER_CARD_CLASSES.showInPicker}`).click(function () {
-		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInPickerSwitch}`);
-
-		$switch.toggleClass(SWITCH_CLASSES.checked);
-
-		Settings.set(`picker.server.show.${server.id}`, $switch.hasClass(SWITCH_CLASSES.checked));
-	});
-
-	return $card;
-}
-
 function updateHiddenServers() {
 	$('.guild').map((i, guild) => {
 		const $avatar = $(guild).find('.avatar-small');
@@ -1880,6 +2051,11 @@ function updateHiddenServers() {
 		}
 
 		const server = Server.getById(match[1]);
+
+		if (!server) {
+			console.log(match);
+			return guild;
+		}
 
 		if (server.isShownInList() || !Settings.get('enabled', true)) {
 			$(guild).removeAttr('style');
@@ -1897,7 +2073,7 @@ exports.updateHiddenServers = updateHiddenServers;
 
 exports.inject = injectPanel;
 
-},{"./classes.js":4,"./constants.js":5,"./server.js":13,"./settings.js":15}],15:[function(require,module,exports){
+},{"./checkbox.js":4,"./classes.js":5,"./constants.js":6,"./helpers.js":8,"./server.js":14,"./serverCard.js":15,"./settings.js":17}],17:[function(require,module,exports){
 'use strict';
 
 const {
@@ -1954,5 +2130,5 @@ exports.get = function (key, def) {
 	return valueOrDefault(settings[key], def);
 };
 
-},{"./constants.js":5,"fs":1,"path":2}]},{},[10])
+},{"./constants.js":6,"fs":1,"path":2}]},{},[11])
 //# sourceMappingURL=better-emojis.js.map
