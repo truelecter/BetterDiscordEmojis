@@ -14,7 +14,7 @@ Get rid of grayed-out emojis which you can't pick on servers. Now you'll see onl
 
 [X] Reactions emoji picker
 
-[ ] Settings panel
+[X] Settings panel
 
 [X] Better installer
 
