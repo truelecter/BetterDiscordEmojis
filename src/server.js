@@ -79,7 +79,8 @@ class Server {
 	}
 
 	availableEmojis() {
-		return this.isCurrent() ? this.emojis : this.sharedEmojis;
+		const emojiList = this.isCurrent() ? this.emojis : this.sharedEmojis;
+		return emojiList.filter(e => Settings.get(`picker.emoji.enabled.${e.id}`, true));
 	}
 
 	possibleEmojis() {
