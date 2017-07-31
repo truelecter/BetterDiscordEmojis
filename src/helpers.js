@@ -16,3 +16,20 @@ exports.fetchURL = function fetchURL(options) {
 		$.ajax(options).then(resolve).fail(reject);
 	});
 };
+
+exports.getClasses = function getClasses(from, what) {
+	if (!(what instanceof Array))
+		return from[what];
+
+	const res = [];
+
+	for (const key of what) {
+		if (typeof from[key] === 'undefined') {
+			console.warn(from, `doesn't have property ${key}. Check module numbers`);
+		}
+
+		res.push(from[key]);
+	}
+
+	return res.join(' ');
+};
