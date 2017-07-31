@@ -78,28 +78,54 @@ function buildContentColumn() {
 	}));
 
 	const guildsIcons = getServersIcons();
-	const servers = Server.getAllServers();
 
 	const $serverSortable = $('<div class="be-server-sortable"></div>');
+
+	const servers = Server.getAllServers();
 
 	for (const server of servers) {
 		if (server.isGuild())
 			$serverSortable.append(serverCard(server, guildsIcons));
 	}
 
-	UIkit.accordion($serverSortable, {
+	const serversAccordion = UIkit.accordion($serverSortable, {
 		duration: 150,
 		targets: '> .be-accordion-item',
 		toggle: '> .be-accordion-title',
 		content: '> .be-accordion-data',
 	});
 
+	UIkit.sortable($serverSortable, {
+		animation: 150,
+		'cls-item': SERVER_CARD_CLASSES.serverCard,
+	});
+
+	$serverSortable.on('start', function (event, sortable, target, dragged) {
+		// console.log(arguments);
+		if (target.hasClass('uk-open')) {
+			serversAccordion.toggle(target, false);
+			dragged.css({ height: target.outerHeight() });
+		}
+	});
+
 	$serverSortable.on('beforeshow', function (event, accordion) {
 		$(event.target).closest('.be-accordion-item').trigger('accordion.open');
 	});
 
-	$serverSortable.on('hidden', function (event, active, toggle, content) {
+	$serverSortable.on('hidden', function (event, accordion) {
 		$(event.target).closest('.be-accordion-item').trigger('accordion.close');
+	});
+
+	$serverSortable.on('change', function (event, sortable, target) {
+		const $children = sortable.$el.children();
+		const out = [];
+		out.length = $children.length;
+
+		for (let i = 0; i < $children.length; i++) {
+			out[i] = $($children[i]).data('server-id');
+		}
+
+		Settings.set('picker.serversorder', out);
 	});
 
 	$contentDiv.append($serverSortable);
@@ -236,10 +262,19 @@ function serverCard(server, iconStorage) {
 				</div>
 			</div>
 			<div class="be-accordion-data">
+				<div class="${DIVIDER_ITEM_CLASSES.divider}" style="margin-top: 4px; margin-bottom: 7px;"></div>
 				<div class="container">
-					<div class="be-emoji-container enabled-emoji-container">
+					<div style="flex: 1;">
+						<h3 class="container-title ${getClasses(HEADER_CLASSES, ['h3', 'defaultColor'])}">
+							Enabled Emojis
+						</h3>
+						<div class="${CARD_CLASSES.cardPrimary} be-emoji-container enabled-emoji-container"></div>
 					</div>
-					<div class="be-emoji-container disabled-emoji-container">
+					<div style="flex: 1; padding-left:5px">
+						<h3 class="container-title ${getClasses(HEADER_CLASSES, ['h3', 'defaultColor'])}">
+							Disabled Emojis
+						</h3>
+						<div class="${CARD_CLASSES.cardPrimary} be-emoji-container disabled-emoji-container"></div>
 					</div>
 				</div>
 			</div>
@@ -271,6 +306,8 @@ function serverCard(server, iconStorage) {
 	$enabledEmojis.on('change', handleChange);
 	$disabledEmojis.on('change', handleChange);
 
+	$card.data('server-id', server.id);
+
 	$card.on('accordion.close', () => {
 		handleChange();
 		$enabledEmojis.html('');
@@ -288,6 +325,7 @@ function serverCard(server, iconStorage) {
 			}
 		}
 
+		//FIXME sortable shaking while movening element
 		enabledEmojisSortable = UIkit.sortable($enabledEmojis, {
 			group: `emoji-sortable-${server.id}`,
 			animation: 150,
@@ -306,9 +344,10 @@ function serverCard(server, iconStorage) {
 	});
 
 	//jscs:enable maximumLineLength
-	$card.find(`.${SERVER_CARD_CLASSES.showInServerList}`).click(function () {
-		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInServerListSwitch}`);
+	$card.find(`.${SERVER_CARD_CLASSES.showInServerList}`).click(function (e) {
+		e.stopPropagation();
 
+		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInServerListSwitch}`);
 		$switch.toggleClass(SWITCH_CLASSES.checked);
 
 		const isShown = $switch.hasClass(SWITCH_CLASSES.checked);
@@ -318,9 +357,10 @@ function serverCard(server, iconStorage) {
 		updateHiddenServers();
 	});
 
-	$card.find(`.${SERVER_CARD_CLASSES.showInPicker}`).click(function () {
-		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInPickerSwitch}`);
+	$card.find(`.${SERVER_CARD_CLASSES.showInPicker}`).click(function (e) {
+		e.stopPropagation();
 
+		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInPickerSwitch}`);
 		$switch.toggleClass(SWITCH_CLASSES.checked);
 
 		Settings.set(`picker.server.show.${server.id}`, $switch.hasClass(SWITCH_CLASSES.checked));

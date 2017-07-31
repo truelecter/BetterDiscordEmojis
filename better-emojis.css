@@ -26,7 +26,6 @@
 .be-emoji-container {
     display: flex;
     flex-direction: row;
-    width: 322px;
     flex-wrap: wrap;
 }
 
@@ -45,6 +44,18 @@
 
 .be-accordion-data .container {
     display: flex;
+}
+
+.be-accordion-data .container .enabled-emoji-container {
+    width: 322px;
+}
+
+.be-accordion-data .container .container-title{
+    text-align: center;
+}
+
+.uk-sortable-drag .be-accordion-data {
+    display: none;
 }
 
 /* ========================================================================
