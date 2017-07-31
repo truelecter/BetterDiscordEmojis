@@ -3,7 +3,6 @@
 const Server = require('./server.js');
 const Emoji = require('./emoji.js');
 const Picker = require('./picker.js');
-const { fetchURL } = require('./helpers.js');
 const {
 	API_BASE,
 	TOKEN_KEY,
@@ -11,60 +10,43 @@ const {
 	EMOJI_STORAGE_MODULE,
 	LOCAL_STORAGE_MODULE,
 	CUSTOM_EMOJI_STORAGE_MODULE,
+	SERVERS_STORAGE_MODULE,
+	SERVERS_PERMISSIONS_MODULE,
 } = require('./constants.js');
 
-let MY_ID = '';
-
 function getServers() {
-	return fetchURL({
-		url: `${API_BASE}/users/@me/guilds`,
-		dataType: 'json'
+	return new Promise((resolve, reject) => {
+		if (!SERVERS_STORAGE_MODULE || !SERVERS_STORAGE_MODULE.getGuilds) {
+			reject(new Error('Server storage module is not pointing to server storage'));
+		}
+		resolve(Object.values(SERVERS_STORAGE_MODULE.getGuilds()));
 	});
 }
 
-function getMyId() {
-	return fetchURL({
-		url: `${API_BASE}/users/@me`,
-		dataType: 'json'
-	})
-	.then((response) => {
-		MY_ID = response.id;
+function parseServer({ id, name }) {
+	return new Promise((resolve, reject) => {
+		if (!SERVERS_PERMISSIONS_MODULE || !SERVERS_PERMISSIONS_MODULE.getGuildPermissions) {
+			reject(new Error('Server permission module is not pointing to permission storage'));
+		}
 
-		return response;
-	});
-}
+		if (!CUSTOM_EMOJI_STORAGE_MODULE ||
+			!CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext) {
+			reject(new Error('Custom emoji storage module is not pointing to custom emoji storage'));
+		}
 
-function parseServer({ id: serverId, permissions: serverPermissions }) {
-	return fetchURL({
-		url: `${API_BASE}/guilds/${serverId}/members/${MY_ID}`,
-		dataType: 'json'
-	})
-	.then(({ roles }) => (
-		fetchURL({
-			url: `${API_BASE}/guilds/${serverId}`,
-			dataType: 'json'
-		})
-		.then(({ id, name, emojis }) => ({
-			id,
-			name,
-			roles,
-			emojis
-		}))
-	))
-	.then(({ id, name, emojis, roles }) => {
-		// now we got detailed info about server. fill emoji and managed emojis.
-		// also set name
-		const server = new Server(id, name, serverPermissions);
+		const server = new Server(id, name, SERVERS_PERMISSIONS_MODULE.getGuildPermissions(id));
 		const emojiContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(id);
 
 		// Eventually, CUSTOM_EMOJI_STORAGE_MODULE filters emojis that we can't use by itself!
-		return emojis
+		// FIXME change filer to guild emojis
+		resolve(Object.values(emojiContext.getCustomEmoji()).filter(e => e.guildId == id)
 			.map(e => emojiContext.getById(e.id))
 			.filter(e => !!e)
 			.reduce(function (server, emoji) {
 				server.addEmoji(Emoji.fromRaw(emoji));
 				return server;
-			}, server);
+			}, server)
+		);
 	});
 }
 
@@ -118,8 +100,7 @@ function doGetEmojis() {
 		}
 	});
 
-	return getMyId()
-		.then(getServers)
+	return getServers()
 		.then(parseServers)
 		.then(loadStandartEmojis)
 		.catch(e => {
