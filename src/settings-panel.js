@@ -191,6 +191,11 @@ function updateHiddenServers() {
 
 		const server = Server.getById(match[1]);
 
+		if (!server) {
+			console.log(match);
+			return guild;
+		}
+
 		if (server.isShownInList() || !Settings.get('enabled', true)) {
 			$(guild).removeAttr('style');
 		} else {
