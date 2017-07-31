@@ -23,6 +23,22 @@
     background-position: 50%;
 }
 
+.be-emoji-container-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-content: flex-start;
+}
+
+.be-emoji-container-wrapper .container-title {
+    flex: 0;
+}
+
+.be-emoji-container-wrapper .be-emoji-container {
+    flex: 1;
+}
+
 .be-emoji-container {
     display: flex;
     flex-direction: row;
@@ -48,6 +64,10 @@
 
 .be-accordion-data .container .enabled-emoji-container {
     width: 322px;
+}
+
+.be-accordion-data .container .disabled-emoji-container {
+    width: 100%;
 }
 
 .be-accordion-data .container .container-title{

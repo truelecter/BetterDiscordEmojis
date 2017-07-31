@@ -51,13 +51,13 @@ function serverCard(server, iconStorage, onServerChangeState) {
 			<div class="be-accordion-data">
 				<div class="${DIVIDER_ITEM_CLASSES.divider}" style="margin-top: 4px; margin-bottom: 7px;"></div>
 				<div class="container">
-					<div style="flex: 1;">
+					<div class="be-emoji-container-wrapper">
 						<h3 class="container-title ${getClasses(HEADER_CLASSES, ['h3', 'defaultColor'])}">
 							Enabled Emojis
 						</h3>
 						<div class="${CARD_CLASSES.cardPrimary} be-emoji-container enabled-emoji-container"></div>
 					</div>
-					<div style="flex: 1; padding-left:5px">
+					<div class="be-emoji-container-wrapper" style="padding-left:5px">
 						<h3 class="container-title ${getClasses(HEADER_CLASSES, ['h3', 'defaultColor'])}">
 							Disabled Emojis
 						</h3>
