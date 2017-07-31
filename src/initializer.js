@@ -19,6 +19,7 @@ function getServers() {
 		if (!SERVERS_STORAGE_MODULE || !SERVERS_STORAGE_MODULE.getGuilds) {
 			reject(new Error('Server storage module is not pointing to server storage'));
 		}
+
 		resolve(Object.values(SERVERS_STORAGE_MODULE.getGuilds()));
 	});
 }
@@ -38,8 +39,7 @@ function parseServer({ id, name }) {
 		const emojiContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(id);
 
 		// Eventually, CUSTOM_EMOJI_STORAGE_MODULE filters emojis that we can't use by itself!
-		// FIXME change filer to guild emojis
-		resolve(Object.values(emojiContext.getCustomEmoji()).filter(e => e.guildId == id)
+		resolve(CUSTOM_EMOJI_STORAGE_MODULE.getGuildEmoji(`${id}`)
 			.map(e => emojiContext.getById(e.id))
 			.filter(e => !!e)
 			.reduce(function (server, emoji) {
