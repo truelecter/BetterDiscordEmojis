@@ -80,10 +80,29 @@ function buildContentColumn() {
 	const guildsIcons = getServersIcons();
 	const servers = Server.getAllServers();
 
+	const $serverSortable = $('<div class="be-server-sortable"></div>');
+
 	for (const server of servers) {
 		if (server.isGuild())
-			$contentDiv.append(serverCard(server, guildsIcons));
+			$serverSortable.append(serverCard(server, guildsIcons));
 	}
+
+	UIkit.accordion($serverSortable, {
+		duration: 150,
+		targets: '> .be-accordion-item',
+		toggle: '> .be-accordion-title',
+		content: '> .be-accordion-data',
+	});
+
+	$serverSortable.on('beforeshow', function (event, accordion) {
+		$(event.target).closest('.be-accordion-item').trigger('accordion.open');
+	});
+
+	$serverSortable.on('hidden', function (event, active, toggle, content) {
+		$(event.target).closest('.be-accordion-item').trigger('accordion.close');
+	});
+
+	$contentDiv.append($serverSortable);
 
 	return $column;
 }
@@ -186,8 +205,8 @@ function checkbox({ setting, name, description, value, change }) {
 function serverCard(server, iconStorage) {
 	//jscs:disable maximumLineLength
 	const $card = $(`
-		<div class="${CARD_CLASSES.cardPrimary} ${SERVER_CARD_CLASSES.serverCard}" id="server-card-${server.id}" style="padding: 7px">
-			<div class="${getClasses(FLEX_CLASSES, ['horizontal', 'flex', 'justifyStart', 'alignStretch', 'noWrap'])}">
+		<div class="be-accordion-item ${CARD_CLASSES.cardPrimary} ${SERVER_CARD_CLASSES.serverCard}" id="server-card-${server.id}" style="padding: 7px">
+			<div class="be-accordion-title ${getClasses(FLEX_CLASSES, ['horizontal', 'flex', 'justifyStart', 'alignStretch', 'noWrap'])}">
 				<div class="${FLEX_CHILD_CLASSES.flexChild}" style="padding-right: 15px;">
 					<img class="${SERVER_CARD_CLASSES.icon}" src="${iconStorage[server.id]}"/>
 				</div>
@@ -216,8 +235,75 @@ function serverCard(server, iconStorage) {
 					</div>
 				</div>
 			</div>
+			<div class="be-accordion-data">
+				<div class="container">
+					<div class="be-emoji-container enabled-emoji-container">
+					</div>
+					<div class="be-emoji-container disabled-emoji-container">
+					</div>
+				</div>
+			</div>
 		</div>
 	`);
+
+	const $enabledEmojis = $card.find('.enabled-emoji-container');
+	const $disabledEmojis = $card.find('.disabled-emoji-container');
+	const $accordionContent = $card.find('.be-accordion-data');
+
+	function emojiItem(emoji) {
+		return $('<div class="be-emoji-item"></div>')
+			.css('background-image', `url("${emoji.url}")`)
+			.data('emoji-id', `${emoji.id}`);
+	}
+
+	function handleChange() {
+		$enabledEmojis
+			.children()
+			.map((i, c) => Settings.set(`picker.emoji.enabled.${$(c).data('emoji-id')}`, true));
+		$disabledEmojis
+			.children()
+			.map((i, c) => Settings.set(`picker.emoji.enabled.${$(c).data('emoji-id')}`, false));
+	}
+
+	let enabledEmojisSortable;
+	let disabledEmojisSortable;
+
+	$enabledEmojis.on('change', handleChange);
+	$disabledEmojis.on('change', handleChange);
+
+	$card.on('accordion.close', () => {
+		handleChange();
+		$enabledEmojis.html('');
+		$disabledEmojis.html('');
+		enabledEmojisSortable.$destroy();
+		disabledEmojisSortable.$destroy();
+	});
+
+	$card.on('accordion.open', () => {
+		for (const emoji of server.emojis) {
+			if (Settings.get(`picker.emoji.enabled.${emoji.id}`, true)) {
+				$enabledEmojis.append(emojiItem(emoji));
+			} else {
+				$disabledEmojis.append(emojiItem(emoji));
+			}
+		}
+
+		enabledEmojisSortable = UIkit.sortable($enabledEmojis, {
+			group: `emoji-sortable-${server.id}`,
+			animation: 150,
+			'cls-base': 'be-emoji-container',
+			'cls-item': 'be-emoji-item',
+			'cls-empty': 'be-empty-sortable',
+		});
+
+		disabledEmojisSortable = UIkit.sortable($disabledEmojis, {
+			group: `emoji-sortable-${server.id}`,
+			animation: 150,
+			'cls-base': 'be-emoji-container',
+			'cls-item': 'be-emoji-item',
+			'cls-empty': 'be-empty-sortable',
+		});
+	});
 
 	//jscs:enable maximumLineLength
 	$card.find(`.${SERVER_CARD_CLASSES.showInServerList}`).click(function () {
