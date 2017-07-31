@@ -125,7 +125,7 @@ class Server {
 	}
 
 	static getById(id) {
-		return GLOBAL_SERVER_LIST.reduce((p, c) => (p || ((c.id === id) && c)), false) || null;
+		return GLOBAL_SERVER_LIST.reduce((p, c) => (p || ((c.id == id) && c)), false) || null;
 	}
 }
 
