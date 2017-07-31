@@ -43,10 +43,13 @@ function buildScrollerWrap() {
 	// Append all other server shared emojis
 	if (currentServer.canUseExternalEmojis) {
 		for (const server of Server.getAllServers()) {
-			if (!server.isCurrent() && server.isShownInPicker()
-				&& server.sharedEmojis.length > 0 && IS_NUMBER_REGEX.test(server.id)
+			let availableEmojis = server.availableEmojis();
+			if (!server.isCurrent()
+				&& server.isShownInPicker()
+				&& IS_NUMBER_REGEX.test(server.id)
+				&& availableEmojis.length > 0
 			) {
-				$scr.append(buildServerSpan(server));
+				$scr.append(buildServerSpan(server, availableEmojis));
 			}
 		}
 	}
@@ -94,11 +97,12 @@ function buildScrollerWrap() {
 	return $wrap;
 }
 
-function buildServerSpan(server) {
+function buildServerSpan(server, availableEmojis) {
 	const $emojiList = $(ELEMENT_SERVER_EMOJI_LIST);
+	const emojis = availableEmojis || server.availableEmojis();
 
 	$emojiList.find('.category').html(server.name);
-	$emojiList.append(buildEmojisRows(server.availableEmojis()));
+	$emojiList.append(buildEmojisRows(emojis));
 
 	return $emojiList.html();
 }
