@@ -108,8 +108,19 @@ class Server {
 		return GLOBAL_SERVER_LIST.reduce((p, c) => (p || (c.isCurrent() && c)), false) || null;
 	}
 
-	static getAllServers() {
+	static getAllServersUnordered() {
 		return GLOBAL_SERVER_LIST;
+	}
+
+	static getAllServers() {
+		if (Settings.get('picker.serversorder', false)) {
+			const order = Settings.get('picker.serversorder');
+			return GLOBAL_SERVER_LIST.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+		} else {
+			servers.push(...GLOBAL_SERVER_LIST);
+			Settings.set('picker.serversorder', servers.map(c => c.id));
+			return servers;
+		}
 	}
 
 	static getById(id) {
