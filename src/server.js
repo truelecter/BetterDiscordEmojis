@@ -118,6 +118,7 @@ class Server {
 			const order = Settings.get('picker.serversorder');
 			return GLOBAL_SERVER_LIST.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
 		} else {
+			const servers = [];
 			servers.push(...GLOBAL_SERVER_LIST);
 			Settings.set('picker.serversorder', servers.map(c => c.id));
 			return servers;
