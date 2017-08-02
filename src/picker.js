@@ -77,7 +77,13 @@ function buildScrollerWrap() {
 		console.log('Selected emoji - ', Emoji.getById($(e.target).attr('data-emoji')));
 	})
 	.on('click', '.emoji-item', e => {
-		emojiClickHandler(serverContext.getById($(e.target).attr('data-emoji')));
+		const emoji = Emoji.getById($(e.target).attr('data-emoji'));
+
+		if (emoji.isCustom()) {
+			emojiClickHandler(serverContext.getById($(e.target).attr('data-emoji')));
+		} else {
+			emojiClickHandler(emoji);
+		}
 	})
 	.on('mouseenter', '.emoji-item', e => {
 		$(e.target).addClass('selected');

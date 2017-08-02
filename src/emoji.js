@@ -9,6 +9,8 @@ const roles = Symbol('roles');
 
 const GLOBAL_EMOJI_MAP = new Map;
 
+const NUMBER_REGEX = /^\d+$/;
+
 class Emoji {
 	constructor(
 		_id,
@@ -44,6 +46,10 @@ class Emoji {
 		return this[managed];
 	}
 
+	get require_colons() {
+		return this[requireColons];
+	}
+
 	get colonsRequired() {
 		return this[requireColons];
 	}
@@ -54,6 +60,10 @@ class Emoji {
 
 	get useName() {
 		return this.colonsRequired ? `:${this.name}:` : this.name;
+	}
+
+	isCustom() {
+		return NUMBER_REGEX.test(this[id]);
 	}
 
 	static fromRaw(emojiRaw) {
