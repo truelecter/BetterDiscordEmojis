@@ -21,9 +21,12 @@ const {
 	CUSTOM_EMOJI_STORAGE_MODULE,
 	TRANSLATION_MODULE,
 	STANDART_EMOJI_CLASS,
+	EMOJI_ROW_CATEGORY_HEIGHT,
+	EMOJI_STORAGE_MODULE,
 } = require('./constants.js');
 
 let commonEmojisSpansCache = '';
+let categoriesHeight = {};
 
 let SCROLLER_WRAP = null;
 let SCROLLER_WRAP_OLD = null;
@@ -34,6 +37,7 @@ function buildScrollerWrap() {
 	const $scr = $wrap.find('.scroller');
 	const currentServer = Server.getCurrentServer();
 	const serverContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(currentServer.id);
+	let customEmojisHeight = 0;
 
 	$scr.html(' ').off('click').off('mouseenter').off('mouseleave');
 
@@ -42,30 +46,42 @@ function buildScrollerWrap() {
 			.map(e => e instanceof STANDART_EMOJI_CLASS ? Emoji.getById(e.uniqueName) : Emoji.getById(e.id));
 
 		if (freqUsed.length > 0) {
-			$scr.append(buildServerSpan({
+			const span = buildServerSpan({
 				name: TRANSLATION_MODULE.Messages.EMOJI_CATEGORY_RECENT,
-			}, freqUsed));
+			}, freqUsed);
+
+			customEmojisHeight += EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(freqUsed.length / 10.0));
+			$scr.append(span);
 		}
 	}
 
 	// Append all current server emojis, if any
 	if (currentServer.emojis.length > 0) {
-		$scr.append(buildServerSpan(currentServer));
+		const emojis = currentServer.availableEmojis();
+
+		customEmojisHeight += EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(emojis.length / 10.0));
+		$scr.append(buildServerSpan(currentServer, emojis));
 	}
 
 	// Append all other server shared emojis
 	if (currentServer.canUseExternalEmojis) {
 		for (const server of Server.getAllServers()) {
 			let availableEmojis = server.availableEmojis();
+
 			if (!server.isCurrent()
 				&& server.isShownInPicker()
 				&& IS_NUMBER_REGEX.test(server.id)
 				&& availableEmojis.length > 0
 			) {
+				customEmojisHeight +=
+					EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(availableEmojis.length / 10.0));
 				$scr.append(buildServerSpan(server, availableEmojis));
 			}
 		}
 	}
+
+	categoriesHeight.custom = customEmojisHeight;
+	replaceCategories();
 
 	// Append common emojis
 	if (commonEmojisSpansCache) {
@@ -194,15 +210,24 @@ function addMessageReaction(channel, message, emoji) {
 	});
 }
 
+function showScroller(isDefault) {
+	const $wrap = $(EMOJI_PICKER_PATH).find('.scroller-wrap, .no-search-results');
+
+	if (isDefault) {
+		$wrap.filter('.tl-emoji-scroller-wrap').hide();
+		$wrap.not('.tl-emoji-scroller-wrap').show();
+	} else {
+		$wrap.filter('.tl-emoji-scroller-wrap').show();
+		$wrap.not('.tl-emoji-scroller-wrap').hide();
+	}
+}
+
 function showOriginalScroller() {
-	SCROLLER_WRAP.hide().parent();
-	SCROLLER_WRAP_OLD.show();
+	showScroller(true);
 }
 
 function showCustomScroller() {
-	SCROLLER_WRAP.show();
-	SCROLLER_WRAP_OLD.hide();
-	SCROLLER_WRAP.find('.scroller').scrollTop(0);
+	showScroller(false);
 }
 
 function replaceScroller() {
@@ -218,21 +243,58 @@ function replaceSearchInput() {
 	let $picker = $(EMOJI_PICKER_PATH);
 	SEARCH_INPUT = $picker.find('input');
 
+	// TODO fix default scroller hides slosly
 	SEARCH_INPUT.on('change keydown keyup paste', () => {
-		let $wrap = $picker.find('.scroller-wrap, .no-search-results');
-
-		if (SEARCH_INPUT.val()) {
-			$wrap.filter('.tl-emoji-scroller-wrap').hide();
-			$wrap.not('.tl-emoji-scroller-wrap').show();
-		} else {
-			$wrap.filter('.tl-emoji-scroller-wrap').show();
-			$wrap.not('.tl-emoji-scroller-wrap').hide();
-		}
+		showScroller(!!SEARCH_INPUT.val());
 	});
 }
 
+function replaceCategories() {
+	//Hide original categories
+	const $picker = $(EMOJI_PICKER_PATH);
+	const $oldCategories = $picker.find('.categories').hide();
+	const $input = $picker.find('input');
+
+	const $categoriesElement = $(`
+		<div class="categories be-emoji-categories"></div>
+	`);
+
+	const categories = EMOJI_STORAGE_MODULE.getCategories();
+	categories.unshift('custom');
+	const scrollsTop = {};
+	let fromTop = 0;
+
+	function categoryItem(category) {
+		return $(`<div class="item ${category}"></div>`)
+			.click(function () {
+				const $this = $(this);
+
+				$categoriesElement.children().removeClass('selected');
+				$this.addClass('selected');
+				showCustomScroller();
+				$input.val('');
+
+				SCROLLER_WRAP.find('.scroller')
+					.stop()
+					.animate({ scrollTop: scrollsTop[category] }, 300, 'swing');
+			});
+	}
+
+	for (const category of categories) {
+		scrollsTop[category] = fromTop;
+		fromTop += categoriesHeight[category];
+
+		$categoriesElement.append(categoryItem(category));
+	}
+	$categoriesElement.find('.custom').addClass('selected');
+
+	// Placeholder for future
+	$categoriesElement.append($('<div class="item"></div>'));
+
+	$oldCategories.before($categoriesElement);
+}
+
 function addCustomScrollerParts() {
-	// console.log("picker opened");
 
 	setTimeout(() => {
 		setTimeout(showCustomScroller, 10);
@@ -240,31 +302,13 @@ function addCustomScrollerParts() {
 		replaceScroller();
 		replaceSearchInput();
 
-		const categories = $(EMOJI_PICKER_PATH).find('.categories');
-		const categoriesChildren = categories.children();
-		const customScroller = ['recent', 'custom'];
-
-		categories.on('click', '.item', function (event) {
-			const $this = $(this);
-
-			categoriesChildren.removeClass('selected');
-			$this.addClass('selected');
-
-			customScroller.forEach(function (category) {
-				if ($this.hasClass(category)) {
-					showCustomScroller.call(this, event);
-				}
-			});
-
-			showOriginalScroller.call(this, event);
-		});
-
 	}, 20);
 }
 
 module.exports.buildServerSpan = buildServerSpan;
 module.exports.show = addCustomScrollerParts;
 
-module.exports.setCommonEmojiSpanCache = function (cache) {
+module.exports.setCommonEmojiSpanCache = function (cache, categoriesHeightArg) {
 	commonEmojisSpansCache = cache;
+	categoriesHeight = categoriesHeightArg;
 };

@@ -12,6 +12,7 @@ const {
 	CUSTOM_EMOJI_STORAGE_MODULE,
 	SERVERS_STORAGE_MODULE,
 	SERVERS_PERMISSIONS_MODULE,
+	EMOJI_ROW_CATEGORY_HEIGHT,
 } = require('./constants.js');
 
 function getServers() {
@@ -65,6 +66,7 @@ function parseServers(serversA) {
 
 function loadStandartEmojis() {
 	let commonEmojis = [];
+	const height = {};
 
 	const translation = TRANSLATION_MODULE.Messages;
 	const categories = EMOJI_STORAGE_MODULE.getCategories();
@@ -90,10 +92,13 @@ function loadStandartEmojis() {
 		}
 
 		commonEmojis.push(fakeServer);
+
+		height[category] = EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(emojis.length / 10.0));
 		$commonEmojisSpansCacheSpan.append(Picker.buildServerSpan(fakeServer));
 	}
 
 	return Promise.resolve({
+		categoriesHeight: height,
 		emojis: commonEmojis,
 		spanCache: $commonEmojisSpansCacheSpan.html()
 	});

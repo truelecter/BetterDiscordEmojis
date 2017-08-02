@@ -17,6 +17,8 @@ exports.CUSTOM_EMOJI_STORAGE_MODULE = n(204);
 exports.TOKEN_KEY = n(0).TOKEN_KEY;
 /* May be changed with discord updates.END */
 
+exports.EMOJI_ROW_CATEGORY_HEIGHT = 32;
+
 exports.ELEMENT_SCROLLER_WRAP = '<div class="scroller-wrap tl-emoji-scroller-wrap"><div class="scroller"></div></div>';
 
 exports.ELEMENT_SEARCH_INPUT = '<input type="text" placeholder="Find the perfect emoji" value="">';

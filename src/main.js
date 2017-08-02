@@ -60,7 +60,7 @@ function attachSettingsObserver() {
 }
 
 initEmojis().then((spanCache) => {
-	Picker.setCommonEmojiSpanCache(spanCache.spanCache);
+	Picker.setCommonEmojiSpanCache(spanCache.spanCache, spanCache.categoriesHeight);
 	setTimeout(() => {
 		attachPickerObserver();
 		attachSettingsObserver();
