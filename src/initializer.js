@@ -22,8 +22,8 @@ function getServers() {
 
 		const servers = Object.values(SERVERS_STORAGE_MODULE.getGuilds());
 
-		if (server.length > 0){
-			resolve(server);
+		if (servers.length > 0){
+			resolve(servers);
 			return;
 		}
 
