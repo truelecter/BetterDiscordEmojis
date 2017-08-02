@@ -675,43 +675,16 @@ function getServers() {
 			reject(new Error('Server storage module is not pointing to server storage'));
 		}
 
-		const servers = Object.values(SERVERS_STORAGE_MODULE.getGuilds());
-
-		if (servers.length > 0){
-			resolve(servers);
-			return;
-		}
-
-		// TODO Write better realization
-
-		// I do not undertand fully how this is working,
-		// but it works much more stable then previous method
-
-		// Use Discord action handlres to catch initializtion event
-		new (function (e) {
-			function t() {
-				return e.apply(this, arguments);
+		function checkServers() {
+			const servers = Object.values(SERVERS_STORAGE_MODULE.getGuilds());
+			if (servers.length > 0) {
+				resolve(servers);
 			}
 
-			t.prototype = Object.create(e && e.prototype, {
-				constructor: {
-					value: t,
-					enumerable: false,
-					writable: true,
-					configurable: true
-				}
-			});
-
-			return t;
-		}(n(2).Store))(n(4).default, {
-			CONNECTION_OPEN: function ({ guilds }) {
-				resolve(guilds);
-			}
-		});
-
-		function n(id) {
-			return webpackJsonp([], [], [id]);
+			setTimeout(checkServers, 1000);
 		}
+
+		checkServers();
 	});
 }
 
