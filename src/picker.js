@@ -286,6 +286,7 @@ function replaceCategories() {
 
 		$categoriesElement.append(categoryItem(category));
 	}
+
 	$categoriesElement.find('.custom').addClass('selected');
 
 	// Placeholder for future
