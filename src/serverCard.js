@@ -76,6 +76,7 @@ function serverCard(server, iconStorage, onServerChangeState) {
 		return $('<div class="be-emoji-item"></div>')
 			.css('background-image', `url("${emoji.url}")`)
 			.data('emoji-id', `${emoji.id}`)
+			.attr('title', `${emoji.useName}`)
 			.dblclick(function () {
 				const $this = $(this).detach();
 
@@ -100,6 +101,7 @@ function serverCard(server, iconStorage, onServerChangeState) {
 
 	let enabledEmojisSortable;
 	let disabledEmojisSortable;
+	let emojiTooltip;
 
 	$enabledEmojis.on('change', handleChange);
 	$disabledEmojis.on('change', handleChange);
@@ -112,6 +114,7 @@ function serverCard(server, iconStorage, onServerChangeState) {
 		$disabledEmojis.html('');
 		enabledEmojisSortable.$destroy();
 		disabledEmojisSortable.$destroy();
+		emojiTooltip.$destroy();
 	});
 
 	$card.on('accordion.open', () => {
@@ -139,6 +142,8 @@ function serverCard(server, iconStorage, onServerChangeState) {
 			'cls-item': 'be-emoji-item',
 			'cls-empty': 'be-empty-sortable',
 		});
+
+		emojiTooltip = UIkit.tooltip($accordionContent.find('.be-emoji-item'));
 	});
 
 	$card.find(`.${SERVER_CARD_CLASSES.showInServerList}`).click(function (e) {
