@@ -135,10 +135,12 @@
  * 2. Position
  * 3. Dimensions
  * 4. Style
+ * 5. Animation
  */
 .uk-tooltip {
   /* 1 */
-  display: none;
+  /* display: none; */
+  opacity: 0;
   /* 2 */
   position: absolute;
   z-index: 1030;
@@ -151,10 +153,13 @@
   border-radius: 2px;
   color: #fff;
   font-size: 12px;
+  /* 5 */
+  transition: opacity .15s linear;
 }
 /* Show */
 .uk-tooltip.uk-active {
-  display: block;
+  /* display: block; */
+  opacity: 1;
 }
 /* Direction / Alignment modifiers
  ========================================================================== */
