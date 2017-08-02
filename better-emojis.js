@@ -671,11 +671,41 @@ const {
 
 function getServers() {
 	return new Promise((resolve, reject) => {
-		if (!SERVERS_STORAGE_MODULE || !SERVERS_STORAGE_MODULE.getGuilds) {
-			reject(new Error('Server storage module is not pointing to server storage'));
-		}
+		// if (!SERVERS_STORAGE_MODULE || !SERVERS_STORAGE_MODULE.getGuilds) {
+		// 	reject(new Error('Server storage module is not pointing to server storage'));
+		// }
+		// resolve(Object.values(SERVERS_STORAGE_MODULE.getGuilds()));
 
-		resolve(Object.values(SERVERS_STORAGE_MODULE.getGuilds()));
+		// TODO Write better realization
+
+		// I do not undertand fully how this is working,
+		// but it works much more stable then previous method
+
+		// Use Discord action handlres to catch initializtion event
+		new (function (e) {
+			function t() {
+				return e.apply(this, arguments);
+			}
+
+			t.prototype = Object.create(e && e.prototype, {
+				constructor: {
+					value: t,
+					enumerable: false,
+					writable: true,
+					configurable: true
+				}
+			});
+
+			return t;
+		}(n(2).Store))(n(4).default, {
+			CONNECTION_OPEN: function ({ guilds }) {
+				resolve(guilds);
+			}
+		});
+
+		function n(id) {
+			return webpackJsonp([], [], [id]);
+		}
 	});
 }
 
@@ -1671,6 +1701,7 @@ class Server {
 			const order = Settings.get('picker.serversorder');
 			return GLOBAL_SERVER_LIST.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
 		} else {
+			const servers = [];
 			servers.push(...GLOBAL_SERVER_LIST);
 			Settings.set('picker.serversorder', servers.map(c => c.id));
 			return servers;
@@ -1917,7 +1948,7 @@ function buildServerCards() {
 
 	for (const server of servers) {
 		if (server.isGuild())
-			$serverSortable.append(serverCard(server, guildsIcons));
+			$serverSortable.append(serverCard(server, guildsIcons, updateHiddenServers));
 	}
 
 	const serversAccordion = UIkit.accordion($serverSortable, {
@@ -1949,6 +1980,10 @@ function buildServerCards() {
 	});
 
 	$serverSortable.on('change', function (event, sortable, target) {
+		if (!sortable) {
+			return;
+		}
+
 		const $children = sortable.$el.children();
 		const out = [];
 		out.length = $children.length;
@@ -2087,14 +2122,64 @@ const path = require('path');
 
 const defaultSettings = { enabled: true };
 
+const SETTINGS_HANDLER = {
+	get: function (target, name) {
+		if (typeof name !== 'string') {
+			return undefined;
+		}
+
+		const path = name.split('.');
+		if (!path.every(e => !!e)) {
+			throw Error(`Invalid settings path: ${name}`);
+		}
+
+		let obj = target;
+
+		for (const prop of path) {
+			obj = obj[prop];
+
+			if (!obj) {
+				return obj;
+			}
+		}
+
+		return obj;
+	},
+
+	set: function (target, name, value) {
+
+		if (typeof name !== 'string' || !name) {
+			return value;
+		}
+
+		const path = name.split('.');
+		if (!path.every(e => !!e)) {
+			throw Error(`Invalid settings path: ${name}`);
+		}
+
+		const lastKey = path.pop();
+		let obj = target;
+
+		for (const prop of path) {
+			if (!obj[prop]) {
+				obj[prop] = {};
+			}
+
+			obj = obj[prop];
+		}
+
+		obj[lastKey] = value;
+
+		return true;
+	}
+};
+
 const fileLocation =
 	typeof window.betterEmojiLocation !== 'undefined' &&
 	fs.readFileSync && fs.writeFileSync && path.resolve ?
 	path.resolve(window.betterEmojiLocation, 'config.json') : null;
 
-const loadedSettings = loadSettings();
-
-const settings = Object.assign(defaultSettings, loadedSettings);
+const settings = new Proxy(Object.assign(defaultSettings, loadSettings()), SETTINGS_HANDLER);
 
 function loadSettings() {
 	try {
@@ -2125,6 +2210,8 @@ function valueOrDefault(value, def) {
 
 	return value;
 }
+
+window.beSettings = exports;
 
 exports.get = function (key, def) {
 	return valueOrDefault(settings[key], def);
