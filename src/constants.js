@@ -9,6 +9,7 @@ exports.EMOJI_BUTTON_CLASS = n(2367).emojiButton;
 exports.CHANNEL_TEXTAREA_CLASS = n(2367).channelTextArea;
 exports.LOCAL_STORAGE_MODULE = n(1786);
 exports.EMOJI_STORAGE_MODULE = n(174).default;
+exports.STANDART_EMOJI_CLASS = n(174).Emoji;
 exports.SERVERS_STORAGE_MODULE = n(15);
 exports.SERVERS_PERMISSIONS_MODULE = n(58);
 exports.TRANSLATION_MODULE = n(3);

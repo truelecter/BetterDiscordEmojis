@@ -19,6 +19,8 @@ const {
 	EMOJI_BUTTON_CLASS,
 	CHANNEL_TEXTAREA_CLASS,
 	CUSTOM_EMOJI_STORAGE_MODULE,
+	TRANSLATION_MODULE,
+	STANDART_EMOJI_CLASS,
 } = require('./constants.js');
 
 let commonEmojisSpansCache = '';
@@ -30,10 +32,21 @@ let SEARCH_INPUT = null;
 function buildScrollerWrap() {
 	const $wrap = SCROLLER_WRAP || $(ELEMENT_SCROLLER_WRAP);
 	const $scr = $wrap.find('.scroller');
+	const currentServer = Server.getCurrentServer();
+	const serverContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(currentServer.id);
 
 	$scr.html(' ').off('click').off('mouseenter').off('mouseleave');
 
-	const currentServer = Server.getCurrentServer();
+	if (Settings.get('picker.frequently-used.enabled', true)) {
+		const freqUsed = serverContext.getFrequentlyUsedEmojis()
+			.map(e => e instanceof STANDART_EMOJI_CLASS ? Emoji.getById(e.uniqueName) : Emoji.getById(e.id));
+
+		if (freqUsed.length > 0) {
+			$scr.append(buildServerSpan({
+				name: TRANSLATION_MODULE.Messages.EMOJI_CATEGORY_RECENT,
+			}, freqUsed));
+		}
+	}
 
 	// Append all current server emojis, if any
 	if (currentServer.emojis.length > 0) {
@@ -65,8 +78,6 @@ function buildScrollerWrap() {
 		scrollElem: $scr[0],
 		contentElem: $scr[0]
 	});
-
-	const serverContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(currentServer.id);
 
 	const emojiClickHandler = $(`.${EMOJI_BUTTON_CLASS}`).hasClass('popout-open')
 		? putEmojiInTextarea
