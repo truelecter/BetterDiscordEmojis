@@ -11,14 +11,64 @@ const path = require('path');
 
 const defaultSettings = { enabled: true };
 
+const SETTINGS_HANDLER = {
+	get: function (target, name) {
+		if (typeof name !== 'string') {
+			return undefined;
+		}
+
+		const path = name.split('.');
+		if (!path.every(e => !!e)) {
+			throw Error(`Invalid settings path: ${name}`);
+		}
+
+		let obj = target;
+
+		for (const prop of path) {
+			obj = obj[prop];
+
+			if (!obj) {
+				return obj;
+			}
+		}
+
+		return obj;
+	},
+
+	set: function (target, name, value) {
+
+		if (typeof name !== 'string' || !name) {
+			return value;
+		}
+
+		const path = name.split('.');
+		if (!path.every(e => !!e)) {
+			throw Error(`Invalid settings path: ${name}`);
+		}
+
+		const lastKey = path.pop();
+		let obj = target;
+
+		for (const prop of path) {
+			if (!obj[prop]) {
+				obj[prop] = {};
+			}
+
+			obj = obj[prop];
+		}
+
+		obj[lastKey] = value;
+
+		return true;
+	}
+};
+
 const fileLocation =
 	typeof window.betterEmojiLocation !== 'undefined' &&
 	fs.readFileSync && fs.writeFileSync && path.resolve ?
 	path.resolve(window.betterEmojiLocation, 'config.json') : null;
 
-const loadedSettings = loadSettings();
-
-const settings = Object.assign(defaultSettings, loadedSettings);
+const settings = new Proxy(Object.assign(defaultSettings, loadSettings()), SETTINGS_HANDLER);
 
 function loadSettings() {
 	try {
@@ -49,6 +99,8 @@ function valueOrDefault(value, def) {
 
 	return value;
 }
+
+window.beSettings = exports;
 
 exports.get = function (key, def) {
 	return valueOrDefault(settings[key], def);
