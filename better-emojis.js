@@ -671,10 +671,16 @@ const {
 
 function getServers() {
 	return new Promise((resolve, reject) => {
-		// if (!SERVERS_STORAGE_MODULE || !SERVERS_STORAGE_MODULE.getGuilds) {
-		// 	reject(new Error('Server storage module is not pointing to server storage'));
-		// }
-		// resolve(Object.values(SERVERS_STORAGE_MODULE.getGuilds()));
+		if (!SERVERS_STORAGE_MODULE || !SERVERS_STORAGE_MODULE.getGuilds) {
+			reject(new Error('Server storage module is not pointing to server storage'));
+		}
+
+		const servers = Object.values(SERVERS_STORAGE_MODULE.getGuilds());
+
+		if (server.length > 0){
+			resolve(server);
+			return;
+		}
 
 		// TODO Write better realization
 
