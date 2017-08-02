@@ -88,6 +88,10 @@ function buildServerCards() {
 	});
 
 	$serverSortable.on('change', function (event, sortable, target) {
+		if (!sortable) {
+			return;
+		}
+
 		const $children = sortable.$el.children();
 		const out = [];
 		out.length = $children.length;
