@@ -56,7 +56,7 @@ function buildServerCards() {
 
 	for (const server of servers) {
 		if (server.isGuild())
-			$serverSortable.append(serverCard(server, guildsIcons));
+			$serverSortable.append(serverCard(server, guildsIcons, updateHiddenServers));
 	}
 
 	const serversAccordion = UIkit.accordion($serverSortable, {
