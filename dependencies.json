@@ -1,7 +1,7 @@
 [
 	{
 		"type": "script",
-		"url": "https://raw.githubusercontent.com/TrueLecter/BetterDiscordEmojis/dist/jquery.js"
+		"url": "https://raw.githubusercontent.com/TrueLecter/BetterDiscordEmojis/dist/jquery.min.js"
 	},
 	{
 		"type": "script",
