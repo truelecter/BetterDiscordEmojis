@@ -72,6 +72,7 @@
 
 .be-accordion-data .container .container-title{
     text-align: center;
+    width: 100%;
 }
 
 .uk-sortable-drag .be-accordion-data {
