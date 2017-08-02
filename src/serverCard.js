@@ -73,7 +73,7 @@ function serverCard(server, iconStorage, onServerChangeState) {
 	const $accordionContent = $card.find('.be-accordion-data');
 
 	function emojiItem(emoji) {
-		return $('<div class="be-emoji-item"></div>')
+		return $(`<div class="be-emoji-item ${emoji.isManaged ? 'be-emoji-item-bbtv' : 'be-emoji-item-deafult'}"></div>`)
 			.css('background-image', `url("${emoji.url}")`)
 			.data('emoji-id', `${emoji.id}`)
 			.attr('title', `${emoji.useName}`)
