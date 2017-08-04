@@ -56,6 +56,7 @@
     background-size: contain;
     margin: 2px 0 2px 4px;
     cursor: pointer;
+    transition: opacity .3s;
 }
 
 .be-accordion-data .container {
@@ -70,9 +71,28 @@
     width: 100%;
 }
 
-.be-accordion-data .container .container-title{
+.be-accordion-data .container .container-title {
     text-align: center;
     width: 100%;
+}
+
+.be-emoji-container .be-emoji-faded {
+    opacity: 0.3;
+}
+
+.tools .be-emoji-toggle {
+    margin-top: 150px;
+		font-size: 10px;
+}
+
+.tools .be-emoji-toggle > .be-emoji-toggle-title {
+    margin-top: 38px;
+    position: absolute;
+    width: auto;
+}
+
+.tools .be-emoji-toggle.be-button-enabled {
+    content: 'BBTV'; 
 }
 
 .uk-sortable-drag .be-accordion-data {

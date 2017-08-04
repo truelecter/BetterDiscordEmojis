@@ -71,9 +71,15 @@ function serverCard(server, iconStorage, onServerChangeState) {
 	const $enabledEmojis = $card.find('.enabled-emoji-container');
 	const $disabledEmojis = $card.find('.disabled-emoji-container');
 	const $accordionContent = $card.find('.be-accordion-data');
+	const $showModeButton = $('#be-emoji-show-mode');
 
 	function emojiItem(emoji) {
-		return $(`<div class="be-emoji-item ${emoji.isManaged ? 'be-emoji-item-bbtv' : 'be-emoji-item-deafult'}"></div>`)
+		return $(`<div class="be-emoji-item 
+				${emoji.isManaged ? 'be-emoji-item-bbtv' :
+					$showModeButton.hasClass('be-button-enabled') ?
+						'be-emoji-item-deafult be-emoji-faded' :
+						'be-emoji-item-deafult'
+				}"></div>`)
 			.css('background-image', `url("${emoji.url}")`)
 			.data('emoji-id', `${emoji.id}`)
 			.attr('title', `${emoji.useName}`)

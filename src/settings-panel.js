@@ -159,8 +159,40 @@ function getServersIcons() {
 	return guildsIcons;
 }
 
+function buildToggleDefaultEmojiButton() {
+	const $button = $(`
+		<div id="be-emoji-show-mode" class="btn-close esc-text be-emoji-toggle">
+			<span class="text">ALL</span>
+			<div class="esc-text be-emoji-toggle-title">Show emojis</div>
+		</div>
+	`);
+
+	const $text = $button.find('.text');
+
+	$button.click(function () {
+		const $this = $(this);
+
+		$('.be-emoji-container .be-emoji-item.be-emoji-item-deafult').toggleClass('be-emoji-faded');
+
+		$this.toggleClass('be-button-enabled');
+
+		if ($this.hasClass('be-button-enabled')) {
+			$text.html('BBTV');
+		} else {
+			$text.html('ALL');
+		}
+	});
+
+	return $button;
+}
+
 function injectPanel(layer) {
 	const $layer = $(layer);
+
+	const $fadeToggleButton = buildToggleDefaultEmojiButton();
+
+	$layer.find('.tools')
+		.append($fadeToggleButton);
 
 	const { $entry, $button } = buildSidebarEntry();
 	const $contentColumn = buildContentColumn().hide();
