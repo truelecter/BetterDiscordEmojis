@@ -56,6 +56,7 @@
     background-size: contain;
     margin: 2px 0 2px 4px;
     cursor: pointer;
+    transition: opacity .3s;
 }
 
 .be-accordion-data .container {
@@ -70,8 +71,28 @@
     width: 100%;
 }
 
-.be-accordion-data .container .container-title{
+.be-accordion-data .container .container-title {
     text-align: center;
+    width: 100%;
+}
+
+.be-emoji-container .be-emoji-faded {
+    opacity: 0.3;
+}
+
+.tools .be-emoji-toggle {
+    margin-top: 150px;
+		font-size: 10px;
+}
+
+.tools .be-emoji-toggle > .be-emoji-toggle-title {
+    margin-top: 38px;
+    position: absolute;
+    width: auto;
+}
+
+.tools .be-emoji-toggle.be-button-enabled {
+    content: 'BBTV'; 
 }
 
 .uk-sortable-drag .be-accordion-data {
@@ -124,4 +145,54 @@
 /* Hover */
 .uk-sortable-handle:hover {
   cursor: move;
+}
+
+/* ========================================================================
+   Component: Tooltip
+ ========================================================================== */
+/*
+ * 1. Hide by default
+ * 2. Position
+ * 3. Dimensions
+ * 4. Style
+ * 5. Animation
+ */
+.uk-tooltip {
+  /* 1 */
+  /* display: none; */
+  opacity: 0;
+  /* 2 */
+  position: absolute;
+  z-index: 1030;
+  /* 3 */
+  box-sizing: border-box;
+  max-width: 200px;
+  padding: 3px 6px;
+  /* 4 */
+  background: #666;
+  border-radius: 2px;
+  color: #fff;
+  font-size: 12px;
+  /* 5 */
+  transition: opacity .15s linear;
+}
+/* Show */
+.uk-tooltip.uk-active {
+  /* display: block; */
+  opacity: 1;
+}
+/* Direction / Alignment modifiers
+ ========================================================================== */
+/* Direction */
+[class*='uk-tooltip-top'] {
+  margin-top: -10px;
+}
+[class*='uk-tooltip-bottom'] {
+  margin-top: 10px;
+}
+[class*='uk-tooltip-left'] {
+  margin-left: -10px;
+}
+[class*='uk-tooltip-right'] {
+  margin-left: 10px;
 }
