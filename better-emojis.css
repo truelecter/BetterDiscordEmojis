@@ -99,6 +99,27 @@
     display: none;
 }
 
+/* https://github.com/viduthalai1947/loaderskit/blob/gh-pages/css/main.css */
+.be-emoji-loading-spinner {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: rgba(0,0,0,.5);
+    box-shadow: -14px 0px 0px rgba(0,0,0,0.7);
+    border-radius: 50%;
+    animation: circle_classic 1s ease-in-out infinite alternate;
+}
+
+@keyframes circle_classic {
+    0%{ opacity: 0.1; transform: rotate(0deg) scale(0.5);}
+   100%{opacity: 1; transform: rotate(360deg) scale(1.2);}
+}
+
 /* ========================================================================
    Component: Sortable
  ========================================================================== */

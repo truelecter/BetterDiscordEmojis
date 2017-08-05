@@ -12,7 +12,7 @@
     "uglify": "uglifyjs deploy/better-emojis.js --in-source-map deploy/map/better-emojis.js.map --source-map filename=deploy/map/better-emojis.min.js.map -o deploy/better-emojis.min.js",
     "deploy": "npm-run-all -s build copystyle push",
     "push": "git show --format=format:\"Deploy for commit %H\" -s > deploy/commit-message && cd deploy && git add * && git commit -F commit-message && git push",
-  	"copystyle": "cp -f -T better-emojis.css ./deploy/better-emojis.css || copy /Y better-emojis.css deploy/better-emojis.css"
+    "copystyle": "cp -f -T better-emojis.css ./deploy/better-emojis.css || copy /Y better-emojis.css deploy/better-emojis.css"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
     "browserify": "^14.4.0",
     "exorcist": "^0.4.0",
     "jquery": "^2.2.4",
+    "js-search": "^1.4.2",
     "mkdirp": "^0.5.1",
     "npm-run-all": "^4.0.2",
     "uglify-js": "git://github.com/mishoo/UglifyJS2.git#harmony",

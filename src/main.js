@@ -62,6 +62,7 @@ function attachSettingsObserver() {
 }
 
 initEmojis().then((emojiCache) => {
+	Picker.handleServerChange();
 	Picker.setCommonEmojiSpanCache(emojiCache);
 	setTimeout(() => {
 		attachPickerObserver();
