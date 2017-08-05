@@ -84,7 +84,7 @@ class Server {
 	}
 
 	possibleEmojis() {
-		const list = this.emojis;
+		const list = [...this.emojis];
 
 		for (const server of GLOBAL_SERVER_LIST) {
 			if (server.id === this.id) {
