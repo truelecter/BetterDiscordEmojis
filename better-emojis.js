@@ -503,12 +503,15 @@ exports.EMOJI_BUTTON_CLASS = n(2367).emojiButton;
 exports.CHANNEL_TEXTAREA_CLASS = n(2367).channelTextArea;
 exports.LOCAL_STORAGE_MODULE = n(1786);
 exports.EMOJI_STORAGE_MODULE = n(174).default;
+exports.STANDART_EMOJI_CLASS = n(174).Emoji;
 exports.SERVERS_STORAGE_MODULE = n(15);
 exports.SERVERS_PERMISSIONS_MODULE = n(58);
 exports.TRANSLATION_MODULE = n(3);
 exports.CUSTOM_EMOJI_STORAGE_MODULE = n(204);
 exports.TOKEN_KEY = n(0).TOKEN_KEY;
 /* May be changed with discord updates.END */
+
+exports.EMOJI_ROW_CATEGORY_HEIGHT = 32;
 
 exports.ELEMENT_SCROLLER_WRAP = '<div class="scroller-wrap tl-emoji-scroller-wrap"><div class="scroller"></div></div>';
 
@@ -551,6 +554,8 @@ const roles = Symbol('roles');
 
 const GLOBAL_EMOJI_MAP = new Map;
 
+const NUMBER_REGEX = /^\d+$/;
+
 class Emoji {
 	constructor(
 		_id,
@@ -586,6 +591,10 @@ class Emoji {
 		return this[managed];
 	}
 
+	get require_colons() {
+		return this[requireColons];
+	}
+
 	get colonsRequired() {
 		return this[requireColons];
 	}
@@ -596,6 +605,10 @@ class Emoji {
 
 	get useName() {
 		return this.colonsRequired ? `:${this.name}:` : this.name;
+	}
+
+	isCustom() {
+		return NUMBER_REGEX.test(this[id]);
 	}
 
 	static fromRaw(emojiRaw) {
@@ -667,6 +680,7 @@ const {
 	CUSTOM_EMOJI_STORAGE_MODULE,
 	SERVERS_STORAGE_MODULE,
 	SERVERS_PERMISSIONS_MODULE,
+	EMOJI_ROW_CATEGORY_HEIGHT,
 } = require('./constants.js');
 
 function getServers() {
@@ -719,7 +733,9 @@ function parseServers(serversA) {
 }
 
 function loadStandartEmojis() {
-	let commonEmojis = [];
+	const commonEmojisServers = [];
+	const commonEmojis = []
+	const height = {};
 
 	const translation = TRANSLATION_MODULE.Messages;
 	const categories = EMOJI_STORAGE_MODULE.getCategories();
@@ -732,24 +748,29 @@ function loadStandartEmojis() {
 		const emojis = EMOJI_STORAGE_MODULE.getByCategory(category);
 
 		for (let emoji of emojis) {
-			fakeServer.addEmoji(
-				new Emoji(
+			const emoje = new Emoji(
 					emoji.uniqueName,
 					emoji.uniqueName,
 					emoji.managed,
 					emoji.allNamesString.includes(':'),
 					[],
 					emoji.defaultUrl
-				)
-			);
+				);
+			
+			fakeServer.addEmoji(emoje);
+			commonEmojis.push(emoje);
 		}
 
-		commonEmojis.push(fakeServer);
+		commonEmojisServers.push(fakeServer);
+
+		height[category] = EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(emojis.length / 10.0));
 		$commonEmojisSpansCacheSpan.append(Picker.buildServerSpan(fakeServer));
 	}
 
 	return Promise.resolve({
+		categoriesHeight: height,
 		emojis: commonEmojis,
+		servers: commonEmojisServers,
 		spanCache: $commonEmojisSpansCacheSpan.html()
 	});
 }
@@ -1190,8 +1211,8 @@ function attachSettingsObserver() {
 	window.better_emojis.settingsObserver.observe($('.layers')[0]);
 }
 
-initEmojis().then((spanCache) => {
-	Picker.setCommonEmojiSpanCache(spanCache.spanCache);
+initEmojis().then((emojiCache) => {
+	Picker.setCommonEmojiSpanCache(emojiCache);
 	setTimeout(() => {
 		attachPickerObserver();
 		attachSettingsObserver();
@@ -1326,9 +1347,14 @@ const {
 	EMOJI_BUTTON_CLASS,
 	CHANNEL_TEXTAREA_CLASS,
 	CUSTOM_EMOJI_STORAGE_MODULE,
+	TRANSLATION_MODULE,
+	STANDART_EMOJI_CLASS,
+	EMOJI_ROW_CATEGORY_HEIGHT,
+	EMOJI_STORAGE_MODULE,
 } = require('./constants.js');
 
 let commonEmojisSpansCache = '';
+let categoriesHeight = {};
 
 let SCROLLER_WRAP = null;
 let SCROLLER_WRAP_OLD = null;
@@ -1337,29 +1363,53 @@ let SEARCH_INPUT = null;
 function buildScrollerWrap() {
 	const $wrap = SCROLLER_WRAP || $(ELEMENT_SCROLLER_WRAP);
 	const $scr = $wrap.find('.scroller');
+	const currentServer = Server.getCurrentServer();
+	const serverContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(currentServer.id);
+	let customEmojisHeight = 0;
 
 	$scr.html(' ').off('click').off('mouseenter').off('mouseleave');
 
-	const currentServer = Server.getCurrentServer();
+	if (Settings.get('picker.frequently-used.enabled', true)) {
+		const freqUsed = serverContext.getFrequentlyUsedEmojis()
+			.map(e => e instanceof STANDART_EMOJI_CLASS ? Emoji.getById(e.uniqueName) : Emoji.getById(e.id));
+
+		if (freqUsed.length > 0) {
+			const span = buildServerSpan({
+				name: TRANSLATION_MODULE.Messages.EMOJI_CATEGORY_RECENT,
+			}, freqUsed);
+
+			customEmojisHeight += EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(freqUsed.length / 10.0));
+			$scr.append(span);
+		}
+	}
 
 	// Append all current server emojis, if any
 	if (currentServer.emojis.length > 0) {
-		$scr.append(buildServerSpan(currentServer));
+		const emojis = currentServer.availableEmojis();
+
+		customEmojisHeight += EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(emojis.length / 10.0));
+		$scr.append(buildServerSpan(currentServer, emojis));
 	}
 
 	// Append all other server shared emojis
 	if (currentServer.canUseExternalEmojis) {
 		for (const server of Server.getAllServers()) {
 			let availableEmojis = server.availableEmojis();
+
 			if (!server.isCurrent()
 				&& server.isShownInPicker()
 				&& IS_NUMBER_REGEX.test(server.id)
 				&& availableEmojis.length > 0
 			) {
+				customEmojisHeight +=
+					EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(availableEmojis.length / 10.0));
 				$scr.append(buildServerSpan(server, availableEmojis));
 			}
 		}
 	}
+
+	categoriesHeight.custom = customEmojisHeight;
+	replaceCategories();
 
 	// Append common emojis
 	if (commonEmojisSpansCache) {
@@ -1373,8 +1423,6 @@ function buildScrollerWrap() {
 		contentElem: $scr[0]
 	});
 
-	const serverContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(currentServer.id);
-
 	const emojiClickHandler = $(`.${EMOJI_BUTTON_CLASS}`).hasClass('popout-open')
 		? putEmojiInTextarea
 		: addCurrentMessageReaction;
@@ -1384,7 +1432,13 @@ function buildScrollerWrap() {
 		console.log('Selected emoji - ', Emoji.getById($(e.target).attr('data-emoji')));
 	})
 	.on('click', '.emoji-item', e => {
-		emojiClickHandler(serverContext.getById($(e.target).attr('data-emoji')));
+		const emoji = Emoji.getById($(e.target).attr('data-emoji'));
+
+		if (emoji.isCustom()) {
+			emojiClickHandler(serverContext.getById($(e.target).attr('data-emoji')));
+		} else {
+			emojiClickHandler(emoji);
+		}
 	})
 	.on('mouseenter', '.emoji-item', e => {
 		$(e.target).addClass('selected');
@@ -1484,15 +1538,24 @@ function addMessageReaction(channel, message, emoji) {
 	});
 }
 
+function showScroller(isDefault) {
+	const $wrap = $(EMOJI_PICKER_PATH).find('.scroller-wrap, .no-search-results');
+
+	if (isDefault) {
+		$wrap.filter('.tl-emoji-scroller-wrap').hide();
+		$wrap.not('.tl-emoji-scroller-wrap').show();
+	} else {
+		$wrap.filter('.tl-emoji-scroller-wrap').show();
+		$wrap.not('.tl-emoji-scroller-wrap').hide();
+	}
+}
+
 function showOriginalScroller() {
-	SCROLLER_WRAP.hide().parent();
-	SCROLLER_WRAP_OLD.show();
+	showScroller(true);
 }
 
 function showCustomScroller() {
-	SCROLLER_WRAP.show();
-	SCROLLER_WRAP_OLD.hide();
-	SCROLLER_WRAP.find('.scroller').scrollTop(0);
+	showScroller(false);
 }
 
 function replaceScroller() {
@@ -1508,21 +1571,59 @@ function replaceSearchInput() {
 	let $picker = $(EMOJI_PICKER_PATH);
 	SEARCH_INPUT = $picker.find('input');
 
+	// TODO fix default scroller hides slosly
 	SEARCH_INPUT.on('change keydown keyup paste', () => {
-		let $wrap = $picker.find('.scroller-wrap, .no-search-results');
-
-		if (SEARCH_INPUT.val()) {
-			$wrap.filter('.tl-emoji-scroller-wrap').hide();
-			$wrap.not('.tl-emoji-scroller-wrap').show();
-		} else {
-			$wrap.filter('.tl-emoji-scroller-wrap').show();
-			$wrap.not('.tl-emoji-scroller-wrap').hide();
-		}
+		showScroller(!!SEARCH_INPUT.val());
 	});
 }
 
+function replaceCategories() {
+	//Hide original categories
+	const $picker = $(EMOJI_PICKER_PATH);
+	const $oldCategories = $picker.find('.categories').hide();
+	const $input = $picker.find('input');
+
+	const $categoriesElement = $(`
+		<div class="categories be-emoji-categories"></div>
+	`);
+
+	const categories = EMOJI_STORAGE_MODULE.getCategories();
+	categories.unshift('custom');
+	const scrollsTop = {};
+	let fromTop = 0;
+
+	function categoryItem(category) {
+		return $(`<div class="item ${category}"></div>`)
+			.click(function () {
+				const $this = $(this);
+
+				$categoriesElement.children().removeClass('selected');
+				$this.addClass('selected');
+				showCustomScroller();
+				$input.val('');
+
+				SCROLLER_WRAP.find('.scroller')
+					.stop()
+					.animate({ scrollTop: scrollsTop[category] }, 300, 'swing');
+			});
+	}
+
+	for (const category of categories) {
+		scrollsTop[category] = fromTop;
+		fromTop += categoriesHeight[category];
+
+		$categoriesElement.append(categoryItem(category));
+	}
+
+	$categoriesElement.find('.custom').addClass('selected');
+
+	// Placeholder for future
+	$categoriesElement.append($('<div class="item"></div>'));
+
+	$oldCategories.before($categoriesElement);
+}
+
 function addCustomScrollerParts() {
-	// console.log("picker opened");
 
 	setTimeout(() => {
 		setTimeout(showCustomScroller, 10);
@@ -1530,33 +1631,15 @@ function addCustomScrollerParts() {
 		replaceScroller();
 		replaceSearchInput();
 
-		const categories = $(EMOJI_PICKER_PATH).find('.categories');
-		const categoriesChildren = categories.children();
-		const customScroller = ['recent', 'custom'];
-
-		categories.on('click', '.item', function (event) {
-			const $this = $(this);
-
-			categoriesChildren.removeClass('selected');
-			$this.addClass('selected');
-
-			customScroller.forEach(function (category) {
-				if ($this.hasClass(category)) {
-					showCustomScroller.call(this, event);
-				}
-			});
-
-			showOriginalScroller.call(this, event);
-		});
-
 	}, 20);
 }
 
 module.exports.buildServerSpan = buildServerSpan;
 module.exports.show = addCustomScrollerParts;
 
-module.exports.setCommonEmojiSpanCache = function (cache) {
+module.exports.setCommonEmojiSpanCache = function (cache, categoriesHeightArg) {
 	commonEmojisSpansCache = cache;
+	categoriesHeight = categoriesHeightArg;
 };
 
 },{"./constants.js":6,"./emoji.js":7,"./helpers":8,"./lib/clusterize.js":10,"./server.js":14,"./settings.js":17}],14:[function(require,module,exports){
@@ -1771,11 +1854,18 @@ function serverCard(server, iconStorage, onServerChangeState) {
 	const $enabledEmojis = $card.find('.enabled-emoji-container');
 	const $disabledEmojis = $card.find('.disabled-emoji-container');
 	const $accordionContent = $card.find('.be-accordion-data');
+	const $showModeButton = $('#be-emoji-show-mode');
 
 	function emojiItem(emoji) {
-		return $('<div class="be-emoji-item"></div>')
+		return $(`<div class="be-emoji-item 
+				${emoji.isManaged ? 'be-emoji-item-bbtv' :
+					$showModeButton.hasClass('be-button-enabled') ?
+						'be-emoji-item-deafult be-emoji-faded' :
+						'be-emoji-item-deafult'
+				}"></div>`)
 			.css('background-image', `url("${emoji.url}")`)
 			.data('emoji-id', `${emoji.id}`)
+			.attr('title', `${emoji.useName}`)
 			.dblclick(function () {
 				const $this = $(this).detach();
 
@@ -1800,6 +1890,7 @@ function serverCard(server, iconStorage, onServerChangeState) {
 
 	let enabledEmojisSortable;
 	let disabledEmojisSortable;
+	let emojiTooltip;
 
 	$enabledEmojis.on('change', handleChange);
 	$disabledEmojis.on('change', handleChange);
@@ -1812,6 +1903,7 @@ function serverCard(server, iconStorage, onServerChangeState) {
 		$disabledEmojis.html('');
 		enabledEmojisSortable.$destroy();
 		disabledEmojisSortable.$destroy();
+		emojiTooltip.$destroy();
 	});
 
 	$card.on('accordion.open', () => {
@@ -1839,6 +1931,8 @@ function serverCard(server, iconStorage, onServerChangeState) {
 			'cls-item': 'be-emoji-item',
 			'cls-empty': 'be-empty-sortable',
 		});
+
+		emojiTooltip = UIkit.tooltip($accordionContent.find('.be-emoji-item'));
 	});
 
 	$card.find(`.${SERVER_CARD_CLASSES.showInServerList}`).click(function (e) {
@@ -2030,8 +2124,40 @@ function getServersIcons() {
 	return guildsIcons;
 }
 
+function buildToggleDefaultEmojiButton() {
+	const $button = $(`
+		<div id="be-emoji-show-mode" class="btn-close esc-text be-emoji-toggle">
+			<span class="text">ALL</span>
+			<div class="esc-text be-emoji-toggle-title">Show emojis</div>
+		</div>
+	`);
+
+	const $text = $button.find('.text');
+
+	$button.click(function () {
+		const $this = $(this);
+
+		$('.be-emoji-container .be-emoji-item.be-emoji-item-deafult').toggleClass('be-emoji-faded');
+
+		$this.toggleClass('be-button-enabled');
+
+		if ($this.hasClass('be-button-enabled')) {
+			$text.html('BBTV');
+		} else {
+			$text.html('ALL');
+		}
+	});
+
+	return $button;
+}
+
 function injectPanel(layer) {
 	const $layer = $(layer);
+
+	const $fadeToggleButton = buildToggleDefaultEmojiButton();
+
+	$layer.find('.tools')
+		.append($fadeToggleButton);
 
 	const { $entry, $button } = buildSidebarEntry();
 	const $contentColumn = buildContentColumn().hide();
