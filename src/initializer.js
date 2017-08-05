@@ -68,7 +68,7 @@ function parseServers(serversA) {
 
 function loadStandartEmojis() {
 	const commonEmojisServers = [];
-	const commonEmojis = []
+	const commonEmojis = [];
 	const height = {};
 
 	const translation = TRANSLATION_MODULE.Messages;
@@ -90,7 +90,7 @@ function loadStandartEmojis() {
 					[],
 					emoji.defaultUrl
 				);
-			
+
 			fakeServer.addEmoji(emoje);
 			commonEmojis.push(emoje);
 		}

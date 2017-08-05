@@ -1,7 +1,7 @@
 'use strict';
 
 const JsSearch = require('js-search');
-const $ = require('jquery')
+const $ = require('jquery');
 const Clusterize = require('./lib/clusterize.js');
 const Emoji = require('./emoji.js');
 const Server = require('./server.js');
@@ -37,102 +37,102 @@ let SEARCH_INPUT = null;
 
 function buildScrollerWrap() {
 	return new Promise((resolve, reject) => {
-	const $wrap = SCROLLER_WRAP || $(ELEMENT_SCROLLER_WRAP);
-	const $scr = $wrap.find('.scroller');
-	const currentServer = Server.getCurrentServer();
-	const serverContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(currentServer.id);
-	let customEmojisHeight = 0;
+		const $wrap = SCROLLER_WRAP || $(ELEMENT_SCROLLER_WRAP);
+		const $scr = $wrap.find('.scroller');
+		const currentServer = Server.getCurrentServer();
+		const serverContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(currentServer.id);
+		let customEmojisHeight = 0;
 
-	$scr.html(' ').off('click').off('mouseenter').off('mouseleave');
+		$scr.html(' ').off('click').off('mouseenter').off('mouseleave');
 
-	if (Settings.get('picker.frequently-used.enabled', true)) {
-		const freqUsed = serverContext.getFrequentlyUsedEmojis()
-			.map(e => e instanceof STANDART_EMOJI_CLASS ? Emoji.getById(e.uniqueName) : Emoji.getById(e.id))
-			.filter(e => !!e);
+		if (Settings.get('picker.frequently-used.enabled', true)) {
+			const freqUsed = serverContext.getFrequentlyUsedEmojis()
+				.map(e => e instanceof STANDART_EMOJI_CLASS ? Emoji.getById(e.uniqueName) : Emoji.getById(e.id))
+				.filter(e => !!e);
 
-		if (freqUsed.length > 0) {
-			const span = buildServerSpan({
-				name: TRANSLATION_MODULE.Messages.EMOJI_CATEGORY_RECENT,
-			}, freqUsed);
+			if (freqUsed.length > 0) {
+				const span = buildServerSpan({
+					name: TRANSLATION_MODULE.Messages.EMOJI_CATEGORY_RECENT,
+				}, freqUsed);
 
-			customEmojisHeight += EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(freqUsed.length / 10.0));
-			$scr.append(span);
-		}
-	}
-
-	// Append all current server emojis, if any
-	if (currentServer.emojis.length > 0) {
-		const emojis = currentServer.availableEmojis();
-
-		customEmojisHeight += EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(emojis.length / 10.0));
-		$scr.append(buildServerSpan(currentServer, emojis));
-	}
-
-	// Append all other server shared emojis
-	if (currentServer.canUseExternalEmojis) {
-		for (const server of Server.getAllServers()) {
-			let availableEmojis = server.availableEmojis();
-
-			if (!server.isCurrent()
-				&& server.isShownInPicker()
-				&& IS_NUMBER_REGEX.test(server.id)
-				&& availableEmojis.length > 0
-			) {
-				customEmojisHeight +=
-					EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(availableEmojis.length / 10.0));
-				$scr.append(buildServerSpan(server, availableEmojis));
+				customEmojisHeight += EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(freqUsed.length / 10.0));
+				$scr.append(span);
 			}
 		}
-	}
 
-	categoriesHeight.custom = customEmojisHeight;
-	replaceCategories();
+		// Append all current server emojis, if any
+		if (currentServer.emojis.length > 0) {
+			const emojis = currentServer.availableEmojis();
 
-	// Append common emojis
-	if (commonEmojisSpansCache) {
-		$scr.append(commonEmojisSpansCache);
-	}
-
-	window.better_emojis.current_cluster = new Clusterize({
-		rows_in_block: 10,
-		blocks_in_cluster: 3,
-		scrollElem: $scr[0],
-		contentElem: $scr[0]
-	});
-
-	const emojiClickHandler = $(`.${EMOJI_BUTTON_CLASS}`).hasClass('popout-open')
-		? putEmojiInTextarea
-		: addCurrentMessageReaction;
-
-	$scr
-	.on('click', '.emoji-item', e => {
-		console.log('Selected emoji - ', Emoji.getById($(e.target).attr('data-emoji')));
-	})
-	.on('click', '.emoji-item', e => {
-		const emoji = Emoji.getById($(e.target).attr('data-emoji'));
-
-		if (emoji.isCustom()) {
-			emojiClickHandler(serverContext.getById($(e.target).attr('data-emoji')));
-		} else {
-			emojiClickHandler(emoji);
+			customEmojisHeight += EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(emojis.length / 10.0));
+			$scr.append(buildServerSpan(currentServer, emojis));
 		}
-	})
-	.on('mouseenter', '.emoji-item', e => {
-		$(e.target).addClass('selected');
 
-		if (SEARCH_INPUT) {
-			SEARCH_INPUT.attr('placeholder', Emoji.getById($(e.target).attr('data-emoji')).useName);
+		// Append all other server shared emojis
+		if (currentServer.canUseExternalEmojis) {
+			for (const server of Server.getAllServers()) {
+				let availableEmojis = server.availableEmojis();
+
+				if (!server.isCurrent()
+					&& server.isShownInPicker()
+					&& IS_NUMBER_REGEX.test(server.id)
+					&& availableEmojis.length > 0
+				) {
+					customEmojisHeight +=
+						EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(availableEmojis.length / 10.0));
+					$scr.append(buildServerSpan(server, availableEmojis));
+				}
+			}
 		}
-	})
-	.on('mouseleave', '.emoji-item', e => {
-		$(e.target).removeClass('selected');
 
-		if (SEARCH_INPUT) {
-			SEARCH_INPUT.attr('placeholder', 'Find the perfect emoji');
+		categoriesHeight.custom = customEmojisHeight;
+		replaceCategories();
+
+		// Append common emojis
+		if (commonEmojisSpansCache) {
+			$scr.append(commonEmojisSpansCache);
 		}
-	});
 
-	resolve($wrap);
+		window.better_emojis.current_cluster = new Clusterize({
+			rows_in_block: 10,
+			blocks_in_cluster: 3,
+			scrollElem: $scr[0],
+			contentElem: $scr[0]
+		});
+
+		const emojiClickHandler = $(`.${EMOJI_BUTTON_CLASS}`).hasClass('popout-open')
+			? putEmojiInTextarea
+			: addCurrentMessageReaction;
+
+		$scr
+		.on('click', '.emoji-item', e => {
+			console.log('Selected emoji - ', Emoji.getById($(e.target).attr('data-emoji')));
+		})
+		.on('click', '.emoji-item', e => {
+			const emoji = Emoji.getById($(e.target).attr('data-emoji'));
+
+			if (emoji.isCustom()) {
+				emojiClickHandler(serverContext.getById($(e.target).attr('data-emoji')));
+			} else {
+				emojiClickHandler(emoji);
+			}
+		})
+		.on('mouseenter', '.emoji-item', e => {
+			$(e.target).addClass('selected');
+
+			if (SEARCH_INPUT) {
+				SEARCH_INPUT.attr('placeholder', Emoji.getById($(e.target).attr('data-emoji')).useName);
+			}
+		})
+		.on('mouseleave', '.emoji-item', e => {
+			$(e.target).removeClass('selected');
+
+			if (SEARCH_INPUT) {
+				SEARCH_INPUT.attr('placeholder', 'Find the perfect emoji');
+			}
+		});
+
+		resolve($wrap);
 	});
 }
 
@@ -244,7 +244,7 @@ function replaceScroller() {
 			</div>
 		</div>
 	`);
-	 
+
 	SCROLLER_WRAP_OLD = $(EMOJI_PICKER_PATH).find('.scroller-wrap').hide().before($loading);
 
 	return buildScrollerWrap().then((wrap) => {
@@ -257,11 +257,12 @@ function replaceScroller() {
 let searchIndex = null;
 
 function replaceSearchInput() {
-	SEARCH_INPUT = $(`
+	// jscs:disable requireDollarBeforejQueryAssignment
+	SEARCH_INPUT = $(` 
 		<input type="text" placeholder="${TRANSLATION_MODULE.Messages.SEARCH_FOR_EMOJI}" value="">
-	`);
-	$(EMOJI_PICKER_PATH).find("input").hide().before(SEARCH_INPUT);
-	
+	`); // jscs:enable requireDollarBeforejQueryAssignment
+	$(EMOJI_PICKER_PATH).find('input').hide().before(SEARCH_INPUT);
+
 	const $searchScrollerWrap = $(`
 		<div class="scroller-wrap">
 			<div class="scroller"></div>
