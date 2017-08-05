@@ -1,5 +1,7 @@
 'use strict';
 
+const $ = require('jquery');
+
 const Picker = require('./picker.js');
 const SettingsPanel = require('./settings-panel.js');
 const Settings = require('./settings.js');

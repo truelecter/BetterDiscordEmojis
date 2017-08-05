@@ -26,9 +26,11 @@
   "dependencies": {
     "browserify": "^14.4.0",
     "exorcist": "^0.4.0",
+    "jquery": "^2.2.4",
     "mkdirp": "^0.5.1",
     "npm-run-all": "^4.0.2",
-    "uglify-js": "git://github.com/mishoo/UglifyJS2.git#harmony"
+    "uglify-js": "git://github.com/mishoo/UglifyJS2.git#harmony",
+    "uikit": "^3.0.0-beta.28"
   },
   "devDependencies": {
     "watchify": "^3.9.0"

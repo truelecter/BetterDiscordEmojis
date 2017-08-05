@@ -1,5 +1,7 @@
 'use strict';
 
+const $ = require('jquery');
+
 const { getClasses } = require('./helpers.js');
 
 const {

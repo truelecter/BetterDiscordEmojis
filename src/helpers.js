@@ -1,6 +1,7 @@
 'use strict';
 
 const { defaultFetchOptions } = require('./constants');
+const $ = require('jquery');
 
 /**
  * Fetch URL

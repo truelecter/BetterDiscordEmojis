@@ -1,5 +1,7 @@
 'use strict';
 
+const $ = require('jquery');
+
 const Server = require('./server.js');
 const Emoji = require('./emoji.js');
 const Picker = require('./picker.js');

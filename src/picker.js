@@ -1,5 +1,6 @@
 'use strict';
 
+const $ = require('jquery')
 const Clusterize = require('./lib/clusterize.js');
 const Emoji = require('./emoji.js');
 const Server = require('./server.js');
@@ -309,7 +310,7 @@ function addCustomScrollerParts() {
 module.exports.buildServerSpan = buildServerSpan;
 module.exports.show = addCustomScrollerParts;
 
-module.exports.setCommonEmojiSpanCache = function (cache, categoriesHeightArg) {
-	commonEmojisSpansCache = cache;
+module.exports.setCommonEmojiSpanCache = function ({ spanCache, categoriesHeight: categoriesHeightArg }) {
+	commonEmojisSpansCache = spanCache;
 	categoriesHeight = categoriesHeightArg;
 };

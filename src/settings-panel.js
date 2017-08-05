@@ -1,5 +1,8 @@
 'use strict';
 
+const $ = require('jquery');
+const UIkit = require('uikit');
+
 const { getClasses } = require('./helpers.js');
 
 const {
