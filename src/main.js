@@ -59,8 +59,8 @@ function attachSettingsObserver() {
 	window.better_emojis.settingsObserver.observe($('.layers')[0]);
 }
 
-initEmojis().then((spanCache) => {
-	Picker.setCommonEmojiSpanCache(spanCache.spanCache, spanCache.categoriesHeight);
+initEmojis().then((emojiCache) => {
+	Picker.setCommonEmojiSpanCache(emojiCache);
 	setTimeout(() => {
 		attachPickerObserver();
 		attachSettingsObserver();

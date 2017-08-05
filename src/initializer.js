@@ -65,7 +65,8 @@ function parseServers(serversA) {
 }
 
 function loadStandartEmojis() {
-	let commonEmojis = [];
+	const commonEmojisServers = [];
+	const commonEmojis = []
 	const height = {};
 
 	const translation = TRANSLATION_MODULE.Messages;
@@ -79,19 +80,20 @@ function loadStandartEmojis() {
 		const emojis = EMOJI_STORAGE_MODULE.getByCategory(category);
 
 		for (let emoji of emojis) {
-			fakeServer.addEmoji(
-				new Emoji(
+			const emoje = new Emoji(
 					emoji.uniqueName,
 					emoji.uniqueName,
 					emoji.managed,
 					emoji.allNamesString.includes(':'),
 					[],
 					emoji.defaultUrl
-				)
-			);
+				);
+			
+			fakeServer.addEmoji(emoje);
+			commonEmojis.push(emoje);
 		}
 
-		commonEmojis.push(fakeServer);
+		commonEmojisServers.push(fakeServer);
 
 		height[category] = EMOJI_ROW_CATEGORY_HEIGHT * (1 + Math.ceil(emojis.length / 10.0));
 		$commonEmojisSpansCacheSpan.append(Picker.buildServerSpan(fakeServer));
@@ -100,6 +102,7 @@ function loadStandartEmojis() {
 	return Promise.resolve({
 		categoriesHeight: height,
 		emojis: commonEmojis,
+		servers: commonEmojisServers,
 		spanCache: $commonEmojisSpansCacheSpan.html()
 	});
 }
