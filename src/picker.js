@@ -282,6 +282,39 @@ function replaceSearchInput() {
 		contentElem: $searchScroller[0],
 	});
 
+	const serverContext = CUSTOM_EMOJI_STORAGE_MODULE.getDisambiguatedEmojiContext(Server.getCurrentServer().id);
+	const emojiClickHandler = $(`.${EMOJI_BUTTON_CLASS}`).hasClass('popout-open')
+		? putEmojiInTextarea
+		: addCurrentMessageReaction;
+
+	$searchScroller
+		.on('click', '.emoji-item', e => {
+			console.log('Selected emoji - ', Emoji.getById($(e.target).attr('data-emoji')));
+		})
+		.on('click', '.emoji-item', e => {
+			const emoji = Emoji.getById($(e.target).attr('data-emoji'));
+
+			if (emoji.isCustom()) {
+				emojiClickHandler(serverContext.getById($(e.target).attr('data-emoji')));
+			} else {
+				emojiClickHandler(emoji);
+			}
+		})
+		.on('mouseenter', '.emoji-item', e => {
+			$(e.target).addClass('selected');
+
+			if (SEARCH_INPUT) {
+				SEARCH_INPUT.attr('placeholder', Emoji.getById($(e.target).attr('data-emoji')).useName);
+			}
+		})
+		.on('mouseleave', '.emoji-item', e => {
+			$(e.target).removeClass('selected');
+
+			if (SEARCH_INPUT) {
+				SEARCH_INPUT.attr('placeholder', 'Find the perfect emoji');
+			}
+		});
+
 	SEARCH_INPUT.on('input', () => {
 		const val = SEARCH_INPUT.val();
 		if (!val) {
