@@ -20412,27 +20412,30 @@ function checkbox({ setting, name, description, value, change }) {
 	return $(`
 		<div class="${[FLEX_CHILD_CLASSES.flex, getClasses(FLEX_CLASSES, ['vertical', 'justifyStart', 'alignStretch', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
 			<div class="${[getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
-				<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.title, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
+				<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.titleDefault, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
 					${name}
 				</h3>
-				<div class="${SWITCH_CLASSES.switchWrapperDefaultActive} ${FLEX_CHILD_CLASSES.flexChild}" style="flex: 0 0 auto;">
-					<input type="checkbox" class="${SWITCH_CLASSES.checkbox}" value="on">
-					<div class="${SWITCH_CLASSES.switch} ${value ? SWITCH_CLASSES.checked : ''}"></div>
+				<div class="${getClasses(SWITCH_CLASSES, ['switchEnabled', 'sizeDefault', 'themeDefault'])} ${value ? SWITCH_CLASSES.valueChecked : SWITCH_CLASSES.valueUnchecked} ${FLEX_CHILD_CLASSES.flexChild}" style="flex: 0 0 auto;">
+					<input type="checkbox" class="${SWITCH_CLASSES.checkboxEnabled}" value="on">
 				</div>
 			</div>
 			<div class="${[LABEL_ITEM_CLASSES.description, SWITCH_ITEM_CLASSES.note, LABEL_ITEM_CLASSES.modeDefault, FONT_SIZE_CLASSES.primary].join(' ')}" style="flex: 1 1 auto; ${description ? '' : 'display: none;'}">
 				${description}
 			</div>
-			<div class="${DIVIDER_ITEM_CLASSES.divider} ${SWITCH_ITEM_CLASSES.divider}"></div>
+			<div class="${DIVIDER_ITEM_CLASSES.divider} ${SWITCH_ITEM_CLASSES.dividerMini}"></div>
 		</div>
 		`) //jscs:enable maximumLineLength
 		.on('click', function () {
 			const $this = $(this).find(`.${SWITCH_CLASSES.switch}`);
 
-			$this.toggleClass(SWITCH_CLASSES.checked);
+			if ($this.hasClass(SWITCH_CLASSES.valueChecked)) {
+				$this.removeClass(SWITCH_CLASSES.valueChecked).addClass(SWITCH_CLASSES.valueUnchecked);
+			} else {
+				$this.removeClass(SWITCH_CLASSES.valueUnchecked).addClass(SWITCH_CLASSES.valueChecked);
+			}
 
 			if (typeof change === 'function') {
-				change($this.hasClass(SWITCH_CLASSES.checked));
+				change($this.hasClass(SWITCH_CLASSES.valueChecked));
 			}
 		});
 }
@@ -20442,16 +20445,16 @@ module.exports = checkbox;
 },{"./classes.js":26,"./helpers.js":29,"jquery":2}],26:[function(require,module,exports){
 'use strict';
 
-exports.SETTINGS_CLASSES = n(2392);
-exports.SWITCH_CLASSES = n(2390);
-exports.FLEX_CHILD_CLASSES = n(2374);
-exports.FLEX_CLASSES = n(2355);
-exports.HEADER_CLASSES = n(2401);
-exports.SWITCH_ITEM_CLASSES = n(2391);
-exports.DIVIDER_ITEM_CLASSES = n(2397);
-exports.LABEL_ITEM_CLASSES = n(2400);
-exports.FONT_SIZE_CLASSES = n(2393);
-exports.CARD_CLASSES = n(2366);
+exports.SETTINGS_CLASSES = n(2152);
+exports.SWITCH_CLASSES = n(2150);
+exports.FLEX_CHILD_CLASSES = n(2134);
+exports.FLEX_CLASSES = n(2115);
+exports.HEADER_CLASSES = n(2161);
+exports.SWITCH_ITEM_CLASSES = n(2151);
+exports.DIVIDER_ITEM_CLASSES = n(2157);
+exports.LABEL_ITEM_CLASSES = n(2160);
+exports.FONT_SIZE_CLASSES = n(2153);
+exports.CARD_CLASSES = n(2126);
 
 exports.SIDEBAR_BUTTON_CLASS = 'be-settings-button';
 exports.SERVER_CARD_CLASSES = {
@@ -20475,15 +20478,15 @@ exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
 exports.EMOJI_PICKER_PATH = '#app-mount > div > div:nth-child(7)';
-exports.EMOJI_BUTTON_CLASS = n(2367).emojiButton;
-exports.CHANNEL_TEXTAREA_CLASS = n(2367).channelTextArea;
-exports.LOCAL_STORAGE_MODULE = n(1786);
-exports.EMOJI_STORAGE_MODULE = n(174).default;
-exports.STANDART_EMOJI_CLASS = n(174).Emoji;
-exports.SERVERS_STORAGE_MODULE = n(15);
-exports.SERVERS_PERMISSIONS_MODULE = n(58);
+exports.EMOJI_BUTTON_CLASS = n(2127).emojiButton;
+exports.CHANNEL_TEXTAREA_CLASS = n(2127).channelTextArea;
+exports.LOCAL_STORAGE_MODULE = n(1598);
+exports.EMOJI_STORAGE_MODULE = n(173).default;
+exports.STANDART_EMOJI_CLASS = n(173).Emoji;
+exports.SERVERS_STORAGE_MODULE = n(13);
+exports.SERVERS_PERMISSIONS_MODULE = n(55);
 exports.TRANSLATION_MODULE = n(3);
-exports.CUSTOM_EMOJI_STORAGE_MODULE = n(204);
+exports.CUSTOM_EMOJI_STORAGE_MODULE = n(197);
 exports.TOKEN_KEY = n(0).TOKEN_KEY;
 /* May be changed with discord updates.END */
 
@@ -21941,21 +21944,19 @@ function serverCard(server, iconStorage, onServerChangeState) {
 				</div>
 				<div class="${FLEX_CHILD_CLASSES.flexChild} ${FLEX_CLASSES.vertical}" style="flex: 1 1 auto;">
 					<div class="margin-bottom-4 ${[SERVER_CARD_CLASSES.showInPicker, getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
-						<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.title, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
+						<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.titleMini, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
 							Picker
 						</h3>
-						<div class="${SWITCH_CLASSES.switchWrapperDefaultActive} ${FLEX_CHILD_CLASSES.flexChild}" style="flex: 0 0 auto;">
-							<input type="checkbox" class="${SWITCH_CLASSES.checkbox}" value="on">
-							<div class="${SWITCH_CLASSES.switch} ${server.isShownInPicker() ? SWITCH_CLASSES.checked : ''} ${SERVER_CARD_CLASSES.showInPickerSwitch}"></div>
+						<div class="${getClasses(SWITCH_CLASSES, ['switchEnabled', 'sizeMini', 'themeDefault'])} ${server.isShownInPicker() ? SWITCH_CLASSES.valueChecked : SWITCH_CLASSES.valueUnchecked} ${FLEX_CHILD_CLASSES.flexChild} ${SERVER_CARD_CLASSES.showInPickerSwitch}" style="flex: 0 0 auto;">
+							<input type="checkbox" class="${SWITCH_CLASSES.checkboxEnabled}" value="on">
 						</div>
 					</div>
 					<div class="margin-bottom-4 ${[SERVER_CARD_CLASSES.showInServerList, getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
-						<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.title, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
+						<h3 class="${[getClasses(HEADER_CLASSES, ['h3', 'defaultColor']),  SWITCH_ITEM_CLASSES.titleMini, FLEX_CHILD_CLASSES.flexChild].join(' ')}" style="flex: 1 1 auto;">
 							Server list
 						</h3>
-						<div class="${SWITCH_CLASSES.switchWrapperDefaultActive} ${FLEX_CHILD_CLASSES.flexChild}" style="flex: 0 0 auto;">
-							<input type="checkbox" class="${SWITCH_CLASSES.checkbox}" value="on">
-							<div class="${SWITCH_CLASSES.switch} ${server.isShownInList() ? SWITCH_CLASSES.checked : ''} ${SERVER_CARD_CLASSES.showInServerListSwitch}"></div>
+						<div class="${getClasses(SWITCH_CLASSES, ['switchEnabled', 'sizeMini', 'themeDefault'])} ${SERVER_CARD_CLASSES.showInServerListSwitch} ${server.isShownInList() ? SWITCH_CLASSES.valueChecked : SWITCH_CLASSES.valueUnchecked} ${FLEX_CHILD_CLASSES.flexChild}" style="flex: 0 0 auto;">
+							<input type="checkbox" class="${SWITCH_CLASSES.checkboxEnabled}" value="on">
 						</div>
 					</div>
 				</div>
@@ -22068,9 +22069,13 @@ function serverCard(server, iconStorage, onServerChangeState) {
 		e.stopPropagation();
 
 		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInServerListSwitch}`);
-		$switch.toggleClass(SWITCH_CLASSES.checked);
+		if ($switch.hasClass(SWITCH_CLASSES.valueChecked)) {
+			$switch.removeClass(SWITCH_CLASSES.valueChecked).addClass(SWITCH_CLASSES.valueUnchecked);
+		} else {
+			$switch.removeClass(SWITCH_CLASSES.valueUnchecked).addClass(SWITCH_CLASSES.valueChecked);
+		}
 
-		const isShown = $switch.hasClass(SWITCH_CLASSES.checked);
+		const isShown = $switch.hasClass(SWITCH_CLASSES.valueChecked);
 
 		Settings.set(`serverlist.show.${server.id}`, isShown);
 
@@ -22081,9 +22086,13 @@ function serverCard(server, iconStorage, onServerChangeState) {
 		e.stopPropagation();
 
 		const $switch = $(this).find(`.${SERVER_CARD_CLASSES.showInPickerSwitch}`);
-		$switch.toggleClass(SWITCH_CLASSES.checked);
+		if ($switch.hasClass(SWITCH_CLASSES.valueChecked)) {
+			$switch.removeClass(SWITCH_CLASSES.valueChecked).addClass(SWITCH_CLASSES.valueUnchecked);
+		} else {
+			$switch.removeClass(SWITCH_CLASSES.valueUnchecked).addClass(SWITCH_CLASSES.valueChecked);
+		}
 
-		Settings.set(`picker.server.show.${server.id}`, $switch.hasClass(SWITCH_CLASSES.checked));
+		Settings.set(`picker.server.show.${server.id}`, $switch.hasClass(SWITCH_CLASSES.valueChecked));
 	});
 
 	return $card;
