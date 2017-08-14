@@ -20445,16 +20445,16 @@ module.exports = checkbox;
 },{"./classes.js":26,"./helpers.js":29,"jquery":2}],26:[function(require,module,exports){
 'use strict';
 
-exports.SETTINGS_CLASSES = n(2185);
-exports.SWITCH_CLASSES = n(2183);
-exports.FLEX_CHILD_CLASSES = n(2165);
-exports.FLEX_CLASSES = n(2147);
-exports.HEADER_CLASSES = n(2194);
-exports.SWITCH_ITEM_CLASSES = n(2184);
-exports.DIVIDER_ITEM_CLASSES = n(2190);
-exports.LABEL_ITEM_CLASSES = n(2193);
-exports.FONT_SIZE_CLASSES = n(2186);
-exports.CARD_CLASSES = n(2157);
+exports.SETTINGS_CLASSES = n(2187);
+exports.SWITCH_CLASSES = n(2185);
+exports.FLEX_CHILD_CLASSES = n(2167);
+exports.FLEX_CLASSES = n(2149);
+exports.HEADER_CLASSES = n(2196);
+exports.SWITCH_ITEM_CLASSES = n(2186);
+exports.DIVIDER_ITEM_CLASSES = n(2192);
+exports.LABEL_ITEM_CLASSES = n(2195);
+exports.FONT_SIZE_CLASSES = n(2188);
+exports.CARD_CLASSES = n(2159);
 
 exports.SIDEBAR_BUTTON_CLASS = 'be-settings-button';
 exports.SERVER_CARD_CLASSES = {
@@ -20478,8 +20478,8 @@ exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
 exports.EMOJI_PICKER_PATH = '#app-mount > div > div:nth-child(7)';
-exports.EMOJI_BUTTON_CLASS = n(2158).emojiButton;
-exports.CHANNEL_TEXTAREA_CLASS = n(2158).channelTextArea;
+exports.EMOJI_BUTTON_CLASS = n(2160).emojiButton;
+exports.CHANNEL_TEXTAREA_CLASS = n(2160).channelTextArea;
 exports.LOCAL_STORAGE_MODULE = n(1624);
 exports.EMOJI_STORAGE_MODULE = n(176).default;
 exports.STANDART_EMOJI_CLASS = n(176).Emoji;
