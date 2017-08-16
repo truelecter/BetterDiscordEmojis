@@ -23,7 +23,7 @@ class Server {
 		this[permissions] = _permissions;
 		this[emojis] = _emojis;
 		this[sharedEmojis] = _sharedEmojis;
-		this[serverRegex] = new RegExp(`.*/${_id.toString()}/\\d+`);
+		this[serverRegex] = new RegExp(`.*/${_id.toString()}/\\d*`);
 
 		GLOBAL_SERVER_LIST.push(this);
 	}
