@@ -25,6 +25,7 @@ const {
 	STANDART_EMOJI_CLASS,
 	EMOJI_ROW_CATEGORY_HEIGHT,
 	EMOJI_STORAGE_MODULE,
+	REACTION_EMOJI_CONVERTER,
 } = require('./constants.js');
 
 let commonEmojisSpansCache = '';
@@ -210,10 +211,18 @@ function addCurrentMessageReaction(emoji) {
 
 function addMessageReaction(channel, message, emoji) {
 	return fetchURL({
-		url: `${API_BASE}/channels/${channel}/messages/${message}/reactions/:${emoji.name}:${emoji.id}/@me`, //jscs:disable maximumLineLength
+		url: `${API_BASE}/channels/${channel}/messages/${message}/reactions/${emojiToReactionCode(emoji)}/@me`, //jscs:disable maximumLineLength
 		method: 'PUT',
 		dataType: 'json',
 	});
+}
+
+function emojiToReactionCode(emoji) {
+	if (emoji.standartEmoji) {
+		return REACTION_EMOJI_CONVERTER.toReactionEmoji(emoji.standartEmoji).name;
+	}
+
+	return `:${emoji.name}:${emoji.id}`;
 }
 
 function showScroller(isDefault) {

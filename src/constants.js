@@ -7,14 +7,15 @@ exports.API_BASE = 'https://discordapp.com/api';
 exports.EMOJI_PICKER_PATH = '#app-mount > div > div:nth-child(7)';
 exports.EMOJI_BUTTON_CLASS = n(2161).emojiButton;
 exports.CHANNEL_TEXTAREA_CLASS = n(2161).channelTextArea;
-exports.LOCAL_STORAGE_MODULE = n(1625);
+exports.LOCAL_STORAGE_MODULE = n(1625); // impl
 exports.EMOJI_STORAGE_MODULE = n(176).default;
 exports.STANDART_EMOJI_CLASS = n(176).Emoji;
-exports.SERVERS_STORAGE_MODULE = n(13);
-exports.SERVERS_PERMISSIONS_MODULE = n(56);
-exports.TRANSLATION_MODULE = n(3);
-exports.CUSTOM_EMOJI_STORAGE_MODULE = n(199);
+exports.SERVERS_STORAGE_MODULE = n(13); // getGuilds
+exports.SERVERS_PERMISSIONS_MODULE = n(56); // getGuildPermissions
+exports.TRANSLATION_MODULE = n(3); // Messages
+exports.CUSTOM_EMOJI_STORAGE_MODULE = n(199); // getDisambiguatedEmojiContext
 exports.TOKEN_KEY = n(0).TOKEN_KEY;
+exports.REACTION_EMOJI_CONVERTER = n(324); // toReactionEmoji
 /* May be changed with discord updates.END */
 
 exports.EMOJI_ROW_CATEGORY_HEIGHT = 32;

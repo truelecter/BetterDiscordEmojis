@@ -90,6 +90,8 @@ function loadStandartEmojis() {
 					[],
 					emoji.defaultUrl
 				);
+			
+			emoje.standartEmoji = emoji;
 
 			fakeServer.addEmoji(emoje);
 			commonEmojis.push(emoje);
