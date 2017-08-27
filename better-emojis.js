@@ -21743,6 +21743,7 @@ function buildSearchIndex() {
 		const emojis = server.possibleEmojis();
 		const search = new JsSearch.Search('id');
 
+		search.indexStrategy = new JsSearch.AllSubstringsIndexStrategy();
 		search.addIndex('name');
 		search.addDocuments(emojis);
 		search.addDocuments(commonEmojis);
