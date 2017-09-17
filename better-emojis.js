@@ -20445,16 +20445,16 @@ module.exports = checkbox;
 },{"./classes.js":26,"./helpers.js":29,"jquery":2}],26:[function(require,module,exports){
 'use strict';
 
-exports.SETTINGS_CLASSES = n(2196);
-exports.SWITCH_CLASSES = n(2194);
-exports.FLEX_CHILD_CLASSES = n(2175);
-exports.FLEX_CLASSES = n(2157);
-exports.HEADER_CLASSES = n(2205);
-exports.SWITCH_ITEM_CLASSES = n(2195);
-exports.DIVIDER_ITEM_CLASSES = n(2201);
-exports.LABEL_ITEM_CLASSES = n(2204);
-exports.FONT_SIZE_CLASSES = n(2197);
-exports.CARD_CLASSES = n(2167);
+exports.SETTINGS_CLASSES = n(2215);
+exports.SWITCH_CLASSES = n(2213);
+exports.FLEX_CHILD_CLASSES = n(2194);
+exports.FLEX_CLASSES = n(2176);
+exports.HEADER_CLASSES = n(2227);
+exports.SWITCH_ITEM_CLASSES = n(2214);
+exports.DIVIDER_ITEM_CLASSES = n(2223);
+exports.LABEL_ITEM_CLASSES = n(2226);
+exports.FONT_SIZE_CLASSES = n(2216);
+exports.CARD_CLASSES = n(2186);
 
 exports.SIDEBAR_BUTTON_CLASS = 'be-settings-button';
 exports.SERVER_CARD_CLASSES = {
@@ -20478,17 +20478,17 @@ exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
 exports.EMOJI_PICKER_PATH = '#app-mount > div > div:nth-child(7)';
-exports.EMOJI_BUTTON_CLASS = n(2168).emojiButton;
-exports.CHANNEL_TEXTAREA_CLASS = n(2168).channelTextArea;
-exports.LOCAL_STORAGE_MODULE = n(1627); // impl
-exports.EMOJI_STORAGE_MODULE = n(175).default;
-exports.STANDART_EMOJI_CLASS = n(175).Emoji;
+exports.EMOJI_BUTTON_CLASS = n(2188).emojiButton;
+exports.CHANNEL_TEXTAREA_CLASS = n(2188).channelTextArea;
+exports.LOCAL_STORAGE_MODULE = n(1639); // impl
+exports.EMOJI_STORAGE_MODULE = n(177).default;
+exports.STANDART_EMOJI_CLASS = n(177).Emoji;
 exports.SERVERS_STORAGE_MODULE = n(13); // getGuilds
-exports.SERVERS_PERMISSIONS_MODULE = n(56); // getGuildPermissions
+exports.SERVERS_PERMISSIONS_MODULE = n(50); // getGuildPermissions
 exports.TRANSLATION_MODULE = n(3); // Messages
-exports.CUSTOM_EMOJI_STORAGE_MODULE = n(202); // getDisambiguatedEmojiContext
+exports.CUSTOM_EMOJI_STORAGE_MODULE = n(203); // getDisambiguatedEmojiContext
 exports.TOKEN_KEY = n(0).TOKEN_KEY;
-exports.REACTION_EMOJI_CONVERTER = n(325); // toReactionEmoji
+exports.REACTION_EMOJI_CONVERTER = n(330); // toReactionEmoji
 /* May be changed with discord updates.END */
 
 exports.EMOJI_ROW_CATEGORY_HEIGHT = 32;
@@ -20739,7 +20739,7 @@ function loadStandartEmojis() {
 					[],
 					emoji.defaultUrl
 				);
-			
+
 			emoje.standartEmoji = emoji;
 
 			fakeServer.addEmoji(emoje);
@@ -21758,7 +21758,6 @@ function addCustomScrollerParts() {
 
 		replaceScroller()
 			.then(replaceSearchInput);
-
 	}, 20);
 }
 
@@ -21953,7 +21952,7 @@ function serverCard(server, iconStorage, onServerChangeState) {
 				</div>
 				<div class="${FLEX_CHILD_CLASSES.flexChild} ${FLEX_CLASSES.vertical}" style="width: 60%">
 					<h5 class="${FLEX_CHILD_CLASSES.flexChild} ${HEADER_CLASSES.h5} margin-bottom-4">${server.name}</h5>
-					<h5 class="${FLEX_CHILD_CLASSES.flexChild} ${HEADER_CLASSES.h5} margin-bottom-4">Emojis: ${server.emojis.length}, BBTV: ${server.sharedEmojis.length}</h5>	
+					<h5 class="${FLEX_CHILD_CLASSES.flexChild} ${HEADER_CLASSES.h5} margin-bottom-4">Emojis: ${server.emojis.length}, Global: ${server.sharedEmojis.length}</h5>	
 				</div>
 				<div class="${FLEX_CHILD_CLASSES.flexChild} ${FLEX_CLASSES.vertical}" style="flex: 1 1 auto;">
 					<div class="margin-bottom-4 ${[SERVER_CARD_CLASSES.showInPicker, getClasses(FLEX_CHILD_CLASSES, ['flex', 'horizontal']), getClasses(FLEX_CLASSES, ['justifyStart', 'alignStart', 'noWrap'])].join(' ')}" style="flex: 1 1 auto;">
@@ -22296,7 +22295,7 @@ function buildToggleDefaultEmojiButton() {
 		$this.toggleClass('be-button-enabled');
 
 		if ($this.hasClass('be-button-enabled')) {
-			$text.html('BBTV');
+			$text.html('GLOB');
 		} else {
 			$text.html('ALL');
 		}
