@@ -5,9 +5,9 @@ exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
 exports.EMOJI_PICKER_PATH = '#app-mount > div > div:nth-child(7)';
-exports.EMOJI_BUTTON_CLASS = n(2188).emojiButton;
-exports.CHANNEL_TEXTAREA_CLASS = n(2188).channelTextArea;
-exports.LOCAL_STORAGE_MODULE = n(1639); // impl
+exports.EMOJI_BUTTON_CLASS = n(2189).emojiButton;
+exports.CHANNEL_TEXTAREA_CLASS = n(2189).channelTextArea;
+exports.LOCAL_STORAGE_MODULE = n(1640); // impl
 exports.EMOJI_STORAGE_MODULE = n(177).default;
 exports.STANDART_EMOJI_CLASS = n(177).Emoji;
 exports.SERVERS_STORAGE_MODULE = n(13); // getGuilds
