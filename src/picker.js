@@ -442,7 +442,6 @@ function addCustomScrollerParts() {
 
 		replaceScroller()
 			.then(replaceSearchInput);
-
 	}, 20);
 }
 

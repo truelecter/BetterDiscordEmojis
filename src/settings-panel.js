@@ -180,7 +180,7 @@ function buildToggleDefaultEmojiButton() {
 		$this.toggleClass('be-button-enabled');
 
 		if ($this.hasClass('be-button-enabled')) {
-			$text.html('BBTV');
+			$text.html('GLOB');
 		} else {
 			$text.html('ALL');
 		}
