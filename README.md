@@ -1,8 +1,6 @@
 # BetterDiscordEmojis
 Modified emoji picker for Discord
 
-# THIS IS NOT WORKING NOW, TY DISCORD TEAM FOR REMOVING GLOBAL EMOTES
-
 [Download](https://github.com/TrueLecter/BetterDiscordEmojis/releases "Releases")
 
 ## Features
