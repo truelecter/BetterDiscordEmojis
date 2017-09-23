@@ -20445,16 +20445,16 @@ module.exports = checkbox;
 },{"./classes.js":26,"./helpers.js":29,"jquery":2}],26:[function(require,module,exports){
 'use strict';
 
-exports.SETTINGS_CLASSES = n(2216);
-exports.SWITCH_CLASSES = n(2214);
-exports.FLEX_CHILD_CLASSES = n(2195);
-exports.FLEX_CLASSES = n(2177);
-exports.HEADER_CLASSES = n(2229);
-exports.SWITCH_ITEM_CLASSES = n(2215);
-exports.DIVIDER_ITEM_CLASSES = n(2225);
-exports.LABEL_ITEM_CLASSES = n(2228);
-exports.FONT_SIZE_CLASSES = n(2217);
-exports.CARD_CLASSES = n(2187);
+exports.SETTINGS_CLASSES = n(2514);
+exports.SWITCH_CLASSES = n(2512);
+exports.FLEX_CHILD_CLASSES = n(2493);
+exports.FLEX_CLASSES = n(2475);
+exports.HEADER_CLASSES = n(2528);
+exports.SWITCH_ITEM_CLASSES = n(2513);
+exports.DIVIDER_ITEM_CLASSES = n(2524);
+exports.LABEL_ITEM_CLASSES = n(2527);
+exports.FONT_SIZE_CLASSES = n(2515);
+exports.CARD_CLASSES = n(2485);
 
 exports.SIDEBAR_BUTTON_CLASS = 'be-settings-button';
 exports.SERVER_CARD_CLASSES = {
@@ -20477,18 +20477,18 @@ function n(id) {
 exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
-exports.EMOJI_PICKER_PATH = '#app-mount > div > div:nth-child(7)';
-exports.EMOJI_BUTTON_CLASS = n(2189).emojiButton;
-exports.CHANNEL_TEXTAREA_CLASS = n(2189).channelTextArea;
-exports.LOCAL_STORAGE_MODULE = n(1640); // impl
-exports.EMOJI_STORAGE_MODULE = n(177).default;
-exports.STANDART_EMOJI_CLASS = n(177).Emoji;
-exports.SERVERS_STORAGE_MODULE = n(13); // getGuilds
-exports.SERVERS_PERMISSIONS_MODULE = n(50); // getGuildPermissions
+exports.EMOJI_PICKER_PATH = '#app-mount > div > div:nth-child(2) > div:nth-child(6)';
+exports.EMOJI_BUTTON_CLASS = n(2487).emojiButton;
+exports.CHANNEL_TEXTAREA_CLASS = n(2487).channelTextArea;
+exports.LOCAL_STORAGE_MODULE = n(1865); // impl
+exports.EMOJI_STORAGE_MODULE = n(186).default;
+exports.STANDART_EMOJI_CLASS = n(186).Emoji;
+exports.SERVERS_STORAGE_MODULE = n(15); // getGuilds
+exports.SERVERS_PERMISSIONS_MODULE = n(49); // getGuildPermissions
 exports.TRANSLATION_MODULE = n(3); // Messages
-exports.CUSTOM_EMOJI_STORAGE_MODULE = n(203); // getDisambiguatedEmojiContext
+exports.CUSTOM_EMOJI_STORAGE_MODULE = n(214); // getDisambiguatedEmojiContext
 exports.TOKEN_KEY = n(0).TOKEN_KEY;
-exports.REACTION_EMOJI_CONVERTER = n(330); // toReactionEmoji
+exports.REACTION_EMOJI_CONVERTER = n(340); // toReactionEmoji
 /* May be changed with discord updates.END */
 
 exports.EMOJI_ROW_CATEGORY_HEIGHT = 32;
