@@ -20486,7 +20486,7 @@ exports.STANDART_EMOJI_CLASS = n(186).Emoji;
 exports.SERVERS_STORAGE_MODULE = n(15); // getGuilds
 exports.SERVERS_PERMISSIONS_MODULE = n(49); // getGuildPermissions
 exports.TRANSLATION_MODULE = n(3); // Messages
-exports.CUSTOM_EMOJI_STORAGE_MODULE = n(214); // getDisambiguatedEmojiContext
+exports.CUSTOM_EMOJI_STORAGE_MODULE = n(215); // getDisambiguatedEmojiContext
 exports.TOKEN_KEY = n(0).TOKEN_KEY;
 exports.REACTION_EMOJI_CONVERTER = n(340); // toReactionEmoji
 /* May be changed with discord updates.END */
