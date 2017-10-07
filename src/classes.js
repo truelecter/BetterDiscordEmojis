@@ -1,15 +1,15 @@
 'use strict';
 
-exports.SETTINGS_CLASSES = n(2519);
-exports.SWITCH_CLASSES = n(2517);
-exports.FLEX_CHILD_CLASSES = n(2498);
-exports.FLEX_CLASSES = n(2480);
-exports.HEADER_CLASSES = n(2533);
-exports.SWITCH_ITEM_CLASSES = n(2518);
-exports.DIVIDER_ITEM_CLASSES = n(2529);
-exports.LABEL_ITEM_CLASSES = n(2532);
-exports.FONT_SIZE_CLASSES = n(2520);
-exports.CARD_CLASSES = n(2490);
+exports.SETTINGS_CLASSES = n(5471);
+exports.SWITCH_CLASSES = n(5154);
+exports.FLEX_CHILD_CLASSES = n(2663);
+exports.FLEX_CLASSES = n(2664);
+exports.HEADER_CLASSES = n(2671);
+exports.SWITCH_ITEM_CLASSES = n(5156);
+exports.DIVIDER_ITEM_CLASSES = n(5155);
+exports.LABEL_ITEM_CLASSES = n(5153);
+exports.FONT_SIZE_CLASSES = n(2668);
+exports.CARD_CLASSES = n(2672);
 
 exports.SIDEBAR_BUTTON_CLASS = 'be-settings-button';
 exports.SERVER_CARD_CLASSES = {
