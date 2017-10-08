@@ -172,9 +172,13 @@ function buildEmojisRows(eL) {
 }
 
 function putEmojiInTextarea(emoji) {
-	const $textarea = $(`.${CHANNEL_TEXTAREA_CLASS} >> textarea`);
-
-	$textarea.val($textarea.val() + (emoji.require_colons ? `:${emoji.name}:` : emoji.name));
+	const $textarea = $(`.${CHANNEL_TEXTAREA_CLASS} >> textarea`).get(0);
+	const reactProps = findReact($textarea);
+	const emojiContent = emoji.require_colons ? `:${emoji.name}:` : emoji.name;
+	$textarea.value
+		= $textarea.textContent
+		= reactProps.memoizedProps.value
+		= ($textarea.value += emojiContent);
 }
 
 function findReact(dom) {
@@ -191,7 +195,7 @@ function getSelectedMessageId() {
 	try {
 		return REACTION_POPOUT_REGEX.exec(
 			findReact($('.btn-reaction.popout-open').closest('.message').find('.message-text').get(0))
-			._currentElement.props.children
+			.memoizedProps.children
 			.filter(c => (
 				Object.keys(c.props).includes('subscribeTo')
 			))[0].props.subscribeTo

@@ -14,7 +14,7 @@ exports.SERVERS_STORAGE_MODULE = n(16); // getGuilds
 exports.SERVERS_PERMISSIONS_MODULE = n(49); // getGuildPermissions
 exports.TRANSLATION_MODULE = n(3); // Messages
 exports.CUSTOM_EMOJI_STORAGE_MODULE = n(208); // getDisambiguatedEmojiContext
-exports.TOKEN_KEY = n(0).TOKEN_KEY;
+exports.TOKEN_KEY = n(1).TOKEN_KEY;
 exports.REACTION_EMOJI_CONVERTER = n(326); // toReactionEmoji
 /* May be changed with discord updates.END */
 
@@ -42,7 +42,8 @@ exports.BETTER_EMOJIS_KEY = 'better-emojis';
  * @type {Object}
  */
 exports.defaultFetchOptions = {
-	method: 'GET'
+	method: 'GET',
+	crossDomain: true,
 };
 
 function n(id) {
