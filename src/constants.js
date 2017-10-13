@@ -4,18 +4,18 @@
 exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
-exports.EMOJI_PICKER_PATH = '#app-mount > div > div:nth-child(2) > div:nth-child(5)';
-exports.EMOJI_BUTTON_CLASS = n(5716).emojiButton;
-exports.CHANNEL_TEXTAREA_CLASS = n(5716).channelTextArea;
-exports.LOCAL_STORAGE_MODULE = n(2586); // impl
+exports.EMOJI_PICKER_PATH = '#app-mount > div:nth-child(2) > div.app > div:nth-child(7)';
+exports.EMOJI_BUTTON_CLASS = n(5495).emojiButton;
+exports.CHANNEL_TEXTAREA_CLASS = n(5495).channelTextArea;
+exports.LOCAL_STORAGE_MODULE = n(2591); // impl
 exports.EMOJI_STORAGE_MODULE = n(187).default;
 exports.STANDART_EMOJI_CLASS = n(187).Emoji;
 exports.SERVERS_STORAGE_MODULE = n(16); // getGuilds
 exports.SERVERS_PERMISSIONS_MODULE = n(49); // getGuildPermissions
 exports.TRANSLATION_MODULE = n(3); // Messages
-exports.CUSTOM_EMOJI_STORAGE_MODULE = n(208); // getDisambiguatedEmojiContext
+exports.CUSTOM_EMOJI_STORAGE_MODULE = n(210); // getDisambiguatedEmojiContext
 exports.TOKEN_KEY = n(1).TOKEN_KEY;
-exports.REACTION_EMOJI_CONVERTER = n(326); // toReactionEmoji
+exports.REACTION_EMOJI_CONVERTER = n(327); // toReactionEmoji
 /* May be changed with discord updates.END */
 
 exports.EMOJI_ROW_CATEGORY_HEIGHT = 32;
