@@ -1,5 +1,7 @@
 'use strict';
 
+window.better_emojis = { loaded: true };
+
 const $ = require('jquery');
 
 const Picker = require('./picker.js');
@@ -65,10 +67,10 @@ initEmojis().then((emojiCache) => {
 	Picker.handleServerChange();
 	Picker.setCommonEmojiSpanCache(emojiCache);
 	setTimeout(() => {
-		window.better_emojis = {};
 		attachPickerObserver();
 		attachSettingsObserver();
 		SettingsPanel.updateHiddenServers();
 		console.log('Better Emojis initialized');
+		window.better_emojis.initialized = true;
 	}, 2000);
 });
