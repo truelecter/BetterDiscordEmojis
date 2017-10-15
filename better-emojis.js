@@ -20553,7 +20553,7 @@ class Emoji {
 		this[requireColons] = _requireColons;
 		this[roles] = _roles;
 
-		GLOBAL_EMOJI_MAP.set(this[id], this);
+		GLOBAL_EMOJI_MAP.set(`${this[id]}`, this);
 	}
 
 	get id() {
@@ -20589,7 +20589,7 @@ class Emoji {
 	}
 
 	isCustom() {
-		return NUMBER_REGEX.test(this[id]);
+		return (100 != this[id]) && (1234 != this[id]) && NUMBER_REGEX.test(this[id]);
 	}
 
 	static fromRaw(emojiRaw) {
@@ -20603,7 +20603,7 @@ class Emoji {
 	}
 
 	static getById(id) {
-		return GLOBAL_EMOJI_MAP.get(id);
+		return GLOBAL_EMOJI_MAP.get(`${id}`);
 	}
 }
 
