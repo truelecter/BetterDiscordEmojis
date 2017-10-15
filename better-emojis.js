@@ -21203,6 +21203,7 @@ initEmojis().then((emojiCache) => {
 	Picker.handleServerChange();
 	Picker.setCommonEmojiSpanCache(emojiCache);
 	setTimeout(() => {
+		window.better_emojis = {};
 		attachPickerObserver();
 		attachSettingsObserver();
 		SettingsPanel.updateHiddenServers();
