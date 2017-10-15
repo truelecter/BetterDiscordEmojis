@@ -20445,16 +20445,18 @@ module.exports = checkbox;
 },{"./classes.js":26,"./helpers.js":29,"jquery":2}],26:[function(require,module,exports){
 'use strict';
 
-exports.SETTINGS_CLASSES = n(5320);
-exports.SWITCH_CLASSES = n(5158);
-exports.FLEX_CHILD_CLASSES = n(2668);
-exports.FLEX_CLASSES = n(2669);
-exports.HEADER_CLASSES = n(2675);
-exports.SWITCH_ITEM_CLASSES = n(5160);
-exports.DIVIDER_ITEM_CLASSES = n(5159);
-exports.LABEL_ITEM_CLASSES = n(5157);
-exports.FONT_SIZE_CLASSES = n(2671);
-exports.CARD_CLASSES = n(2676);
+const N = require('./webpackModuleNumbers.js');
+
+exports.SETTINGS_CLASSES = n(N.SETTINGS_CLASSES);
+exports.SWITCH_CLASSES = n(N.SWITCH_CLASSES);
+exports.FLEX_CHILD_CLASSES = n(N.FLEX_CHILD_CLASSES);
+exports.FLEX_CLASSES = n(N.FLEX_CLASSES);
+exports.HEADER_CLASSES = n(N.HEADER_CLASSES);
+exports.SWITCH_ITEM_CLASSES = n(N.SWITCH_ITEM_CLASSES);
+exports.DIVIDER_ITEM_CLASSES = n(N.DIVIDER_ITEM_CLASSES);
+exports.LABEL_ITEM_CLASSES = n(N.LABEL_ITEM_CLASSES);
+exports.FONT_SIZE_CLASSES = n(N.FONT_SIZE_CLASSES);
+exports.CARD_CLASSES = n(N.CARD_CLASSES);
 
 exports.SIDEBAR_BUTTON_CLASS = 'be-settings-button';
 exports.SERVER_CARD_CLASSES = {
@@ -20470,25 +20472,27 @@ function n(id) {
 	return webpackJsonp([], [], [id]);
 }
 
-},{}],27:[function(require,module,exports){
+},{"./webpackModuleNumbers.js":39}],27:[function(require,module,exports){
 'use strict';
+
+const N = require('./webpackModuleNumbers.js');
 
 //jscs: disable maximumLineLength
 exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
 exports.EMOJI_PICKER_PATH = '#app-mount > div:nth-child(2) > div.app > div:nth-child(7)';
-exports.EMOJI_BUTTON_CLASS = n(5495).emojiButton;
-exports.CHANNEL_TEXTAREA_CLASS = n(5495).channelTextArea;
-exports.LOCAL_STORAGE_MODULE = n(2591); // impl
-exports.EMOJI_STORAGE_MODULE = n(187).default;
-exports.STANDART_EMOJI_CLASS = n(187).Emoji;
-exports.SERVERS_STORAGE_MODULE = n(16); // getGuilds
-exports.SERVERS_PERMISSIONS_MODULE = n(49); // getGuildPermissions
-exports.TRANSLATION_MODULE = n(3); // Messages
-exports.CUSTOM_EMOJI_STORAGE_MODULE = n(210); // getDisambiguatedEmojiContext
+exports.EMOJI_BUTTON_CLASS = n(N.EMOJI_BUTTON_CLASS).emojiButton;
+exports.CHANNEL_TEXTAREA_CLASS = n(N.EMOJI_BUTTON_CLASS).channelTextArea;
+exports.LOCAL_STORAGE_MODULE = n(N.LOCAL_STORAGE_MODULE); // impl
+exports.EMOJI_STORAGE_MODULE = n(N.EMOJI_STORAGE_MODULE).default;
+exports.STANDART_EMOJI_CLASS = n(N.STANDART_EMOJI_CLASS).Emoji;
+exports.SERVERS_STORAGE_MODULE = n(N.SERVERS_STORAGE_MODULE); // getGuilds
+exports.SERVERS_PERMISSIONS_MODULE = n(N.SERVERS_PERMISSIONS_MODULE); // getGuildPermissions
+exports.TRANSLATION_MODULE = n(N.TRANSLATION_MODULE); // Messages
+exports.CUSTOM_EMOJI_STORAGE_MODULE = n(N.CUSTOM_EMOJI_STORAGE_MODULE); // getDisambiguatedEmojiContext
 exports.TOKEN_KEY = n(1).TOKEN_KEY;
-exports.REACTION_EMOJI_CONVERTER = n(327); // toReactionEmoji
+exports.REACTION_EMOJI_CONVERTER = n(N.REACTION_EMOJI_CONVERTER); // toReactionEmoji
 /* May be changed with discord updates.END */
 
 exports.EMOJI_ROW_CATEGORY_HEIGHT = 32;
@@ -20523,7 +20527,7 @@ function n(id) {
 	return webpackJsonp([], [], [id]);
 }
 
-},{}],28:[function(require,module,exports){
+},{"./webpackModuleNumbers.js":39}],28:[function(require,module,exports){
 'use strict';
 
 const id = Symbol('id');
@@ -22483,5 +22487,9 @@ exports.get = function (key, def) {
 	return valueOrDefault(settings[key], def);
 };
 
-},{"./constants.js":27,"fs":1,"path":22}]},{},[32])
+},{"./constants.js":27,"fs":1,"path":22}],39:[function(require,module,exports){
+'use strict';
+
+
+},{}]},{},[32])
 //# sourceMappingURL=better-emojis.js.map
