@@ -1,21 +1,23 @@
 'use strict';
 
+const N = require('./webpackModuleNumbers.js');
+
 //jscs: disable maximumLineLength
 exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
 exports.EMOJI_PICKER_PATH = '#app-mount > div:nth-child(2) > div.app > div:nth-child(7)';
-exports.EMOJI_BUTTON_CLASS = n(5495).emojiButton;
-exports.CHANNEL_TEXTAREA_CLASS = n(5495).channelTextArea;
-exports.LOCAL_STORAGE_MODULE = n(2591); // impl
-exports.EMOJI_STORAGE_MODULE = n(187).default;
-exports.STANDART_EMOJI_CLASS = n(187).Emoji;
-exports.SERVERS_STORAGE_MODULE = n(16); // getGuilds
-exports.SERVERS_PERMISSIONS_MODULE = n(49); // getGuildPermissions
-exports.TRANSLATION_MODULE = n(3); // Messages
-exports.CUSTOM_EMOJI_STORAGE_MODULE = n(210); // getDisambiguatedEmojiContext
+exports.EMOJI_BUTTON_CLASS = n(N.EMOJI_BUTTON_CLASS).emojiButton;
+exports.CHANNEL_TEXTAREA_CLASS = n(N.EMOJI_BUTTON_CLASS).channelTextArea;
+exports.LOCAL_STORAGE_MODULE = n(N.LOCAL_STORAGE_MODULE); // impl
+exports.EMOJI_STORAGE_MODULE = n(N.EMOJI_STORAGE_MODULE).default;
+exports.STANDART_EMOJI_CLASS = n(N.STANDART_EMOJI_CLASS).Emoji;
+exports.SERVERS_STORAGE_MODULE = n(N.SERVERS_STORAGE_MODULE); // getGuilds
+exports.SERVERS_PERMISSIONS_MODULE = n(N.SERVERS_PERMISSIONS_MODULE); // getGuildPermissions
+exports.TRANSLATION_MODULE = n(N.TRANSLATION_MODULE); // Messages
+exports.CUSTOM_EMOJI_STORAGE_MODULE = n(N.CUSTOM_EMOJI_STORAGE_MODULE); // getDisambiguatedEmojiContext
 exports.TOKEN_KEY = n(1).TOKEN_KEY;
-exports.REACTION_EMOJI_CONVERTER = n(327); // toReactionEmoji
+exports.REACTION_EMOJI_CONVERTER = n(N.REACTION_EMOJI_CONVERTER); // toReactionEmoji
 /* May be changed with discord updates.END */
 
 exports.EMOJI_ROW_CATEGORY_HEIGHT = 32;
