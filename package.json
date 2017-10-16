@@ -1,0 +1,14 @@
+{
+  "name": "better-discord-emojis-module-numbers-autoupdater",
+  "version": "0.0.1",
+  "description": "NodeJS app which checks is BetterDiscordEmojis plugin is working properly and updates module numbers if not",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "_TrueLecter_ <andrew.panassiouk@gmail.com> (http://minuette.ru)",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^0.12.0"
+  }
+}
