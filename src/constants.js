@@ -6,7 +6,7 @@ const N = require('./webpackModuleNumbers.js');
 exports.API_BASE = 'https://discordapp.com/api';
 
 /* May be changed with discord updates */
-exports.EMOJI_PICKER_PATH = '#app-mount > div:nth-child(2) > div.app > div:nth-child(6)';
+exports.EMOJI_PICKER_PATH = N.EMOJI_PICKER_PATH;
 exports.EMOJI_BUTTON_CLASS = n(N.EMOJI_BUTTON_CLASS).emojiButton;
 exports.CHANNEL_TEXTAREA_CLASS = n(N.EMOJI_BUTTON_CLASS).channelTextArea;
 exports.LOCAL_STORAGE_MODULE = n(N.LOCAL_STORAGE_MODULE); // impl
