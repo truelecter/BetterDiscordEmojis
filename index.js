@@ -30,7 +30,7 @@ async function generateFile(page, browser) {
 }
 
 (async () => {
-  const browser = await puppeteer.launch({headless: true});
+  const browser = await puppeteer.launch({headless: false});
   let page = await browser.newPage();
   
   await page.setRequestInterceptionEnabled(true);
@@ -97,11 +97,10 @@ async function generateFile(page, browser) {
     console.log('Verifying that there are no gray emojis...')
     results.push(await page.evaluate(() => {
       try {
-        
+       return document.querySelector('div.emoji-item.disabled') == void 0; 
       } catch (e) {
         return false;
-      } 
-      return true;
+      }
     }));
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
