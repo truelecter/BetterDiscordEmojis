@@ -173,7 +173,7 @@ async function generateFile(page, browser) {
     console.log(`All results: ${results.every(t => t)}`);
     console.log(results);
 
-    if (!results.every(t => t) || true) {
+    if (!results.every(t => t)) {
       await generateFile(page, browser);
     }
 
