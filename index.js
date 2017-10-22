@@ -94,6 +94,7 @@ async function generateFile(page, browser) {
     }));
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
+    /*
     console.log('Verifying that there are no gray emojis...')
     results.push(await page.evaluate(() => {
       try {
@@ -103,6 +104,7 @@ async function generateFile(page, browser) {
       }
     }));
     await new Promise((resolve) => setTimeout(resolve, 3000));
+    */
 
     console.log('Clicking first available emoji...');
     results.push(await page.evaluate(() => {
