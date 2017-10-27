@@ -4,7 +4,7 @@
  * Any changes made here will be overriten!
  */
 
-exports.EMOJI_PICKER_PATH = 'div#app-mount > div:eq(1) > div';
+exports.EMOJI_PICKER_PATH = 'div#app-mount > div:eq(1)';
 
 exports.SETTINGS_CLASSES = 5386;
 exports.SWITCH_CLASSES = 5210;
