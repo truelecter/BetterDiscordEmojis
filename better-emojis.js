@@ -22588,26 +22588,26 @@ exports.get = function (key, def) {
  * Any changes made here will be overriten!
  */
 
-exports.EMOJI_PICKER_PATH = 'div.app > div:nth-child(6)';
+exports.EMOJI_PICKER_PATH = 'body,div#app-mount,div:eq(1),div';
 
-exports.SETTINGS_CLASSES = 5344;
-exports.SWITCH_CLASSES = 5182;
-exports.FLEX_CHILD_CLASSES = 2690;
-exports.FLEX_CLASSES = 2691;
-exports.HEADER_CLASSES = 2698;
-exports.SWITCH_ITEM_CLASSES = 5184;
-exports.DIVIDER_ITEM_CLASSES = 5183;
-exports.LABEL_ITEM_CLASSES = 5181;
-exports.FONT_SIZE_CLASSES = 2694;
-exports.CARD_CLASSES = 2699;
-exports.EMOJI_BUTTON_CLASS = 1315;
-exports.LOCAL_STORAGE_MODULE = 2613;
-exports.EMOJI_STORAGE_MODULE = 188;
+exports.SETTINGS_CLASSES = 5386;
+exports.SWITCH_CLASSES = 5210;
+exports.FLEX_CHILD_CLASSES = 2718;
+exports.FLEX_CLASSES = 2719;
+exports.HEADER_CLASSES = 2725;
+exports.SWITCH_ITEM_CLASSES = 1239;
+exports.DIVIDER_ITEM_CLASSES = 5211;
+exports.LABEL_ITEM_CLASSES = 5209;
+exports.FONT_SIZE_CLASSES = 2722;
+exports.CARD_CLASSES = 2726;
+exports.EMOJI_BUTTON_CLASS = 1322;
+exports.LOCAL_STORAGE_MODULE = 2646;
+exports.EMOJI_STORAGE_MODULE = 192;
 exports.SERVERS_STORAGE_MODULE = 16;
-exports.SERVERS_PERMISSIONS_MODULE = 45;
+exports.SERVERS_PERMISSIONS_MODULE = 43;
 exports.TRANSLATION_MODULE = 3;
-exports.CUSTOM_EMOJI_STORAGE_MODULE = 212;
-exports.REACTION_EMOJI_CONVERTER = 332;
+exports.CUSTOM_EMOJI_STORAGE_MODULE = 216;
+exports.REACTION_EMOJI_CONVERTER = 338;
 
 },{}]},{},[32])
 //# sourceMappingURL=better-emojis.js.map
