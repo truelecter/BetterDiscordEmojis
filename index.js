@@ -30,7 +30,7 @@ async function generateFile(page, browser) {
 }
 
 (async () => {
-  const browser = await puppeteer.launch({headless: false});
+  const browser = await puppeteer.launch({headless: true});
   let page = await browser.newPage();
   
   await page.setRequestInterceptionEnabled(true);
