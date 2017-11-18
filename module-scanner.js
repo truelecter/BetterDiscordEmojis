@@ -147,7 +147,7 @@ function dwait(time) {
 }
 
 function getPickerPath() {
-	return new Promise(async (resolve, reject) => {
+	/*return new Promise(async (resolve, reject) => {
 		document.querySelector('div.guild:not(.active)').querySelector('a').click();
 
 		const obs = new MutationObserver(([mutation], observer) => {
@@ -174,6 +174,9 @@ function getPickerPath() {
 		await dwait(500);
 
         document.querySelector('div[class*="emojiButton"]').click();
+	});*/
+	return new Promise((resolve,reject) => {
+		resolve('.popouts');
 	});
 }
 
