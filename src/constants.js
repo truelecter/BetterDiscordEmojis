@@ -16,7 +16,7 @@ exports.SERVERS_STORAGE_MODULE = n(N.SERVERS_STORAGE_MODULE); // getGuilds
 exports.SERVERS_PERMISSIONS_MODULE = n(N.SERVERS_PERMISSIONS_MODULE); // getGuildPermissions
 exports.TRANSLATION_MODULE = n(N.TRANSLATION_MODULE); // Messages
 exports.CUSTOM_EMOJI_STORAGE_MODULE = n(N.CUSTOM_EMOJI_STORAGE_MODULE); // getDisambiguatedEmojiContext
-exports.TOKEN_KEY = n(1).TOKEN_KEY;
+exports.TOKEN_KEY = "token"; // This will be manually changed
 exports.REACTION_EMOJI_CONVERTER = n(N.REACTION_EMOJI_CONVERTER); // toReactionEmoji
 /* May be changed with discord updates.END */
 
